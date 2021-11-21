@@ -13,6 +13,7 @@ import {
 import useCollection from "../../hooks/useCollection";
 import { TokenCard } from "./components";
 import usePaginatedCollection from "hooks/usePaginatedCollection";
+import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
 
 const Home: React.FC = () => {
   const { collection } = useCollection();
@@ -46,15 +47,17 @@ const Home: React.FC = () => {
               colorScheme="blue"
               onClick={previousPage}
               disabled={currentPage === 0}
+              leftIcon={<ChevronLeftIcon />}
             >
               Previous
             </Button>
-            <Button disabled>{currentPage + 1}</Button>
+            <Button as={Box}>{currentPage + 1}</Button>
             <Button
               w="100px"
               colorScheme="blue"
               onClick={nextPage}
               disabled={isLastPage}
+              rightIcon={<ChevronRightIcon />}
             >
               Next
             </Button>
