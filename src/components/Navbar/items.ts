@@ -15,7 +15,7 @@ const NAV_ITEMS: Array<NavItem> = [
       {
         label: "RareTown programs on GitHub",
         subLabel: "Solana program repo",
-        href: "https://github.com/Dodecahedr0x/rare-town",
+        href: "https://github.com/Dodecahedr0x/rare-town-programs",
         newTab: true,
       },
       {
