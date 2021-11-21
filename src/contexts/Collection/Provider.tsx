@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useMemo } from "react";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey, SystemProgram } from "@solana/web3.js";
 import {
@@ -28,18 +28,17 @@ const CollectionProvider: React.FC = ({ children }) => {
   const wallet = useWallet();
 
   const { isOpen: confirming, onOpen, onClose } = useDisclosure();
-  const [currentTransaction, setCurrentTransaction] = useState<string>("");
   const [ownedTokens, setOwnedTokens] = useState<string[]>([]);
   const [userAccount, setUserAccount] = useState<TokenAccount>();
   const [collection, setCollection] = useState<Collection>();
   const [mints, setMints] = useState<CollectionMint[]>([]);
 
+  const provider = useMemo(() => new anchor.Provider(connection, wallet as any, {
+    preflightCommitment: "confirmed",
+  }), [connection, wallet])
+
   const fetchCollection = useCallback(async () => {
     if (!wallet) return;
-
-    const provider = new anchor.Provider(connection, wallet as any, {
-      preflightCommitment: "processed",
-    });
 
     const program = new anchor.Program(idl as anchor.Idl, programID, provider);
 
@@ -51,7 +50,7 @@ const CollectionProvider: React.FC = ({ children }) => {
       (item: CollectionItem) => !item.mint.equals(zeroKey)
     );
     setCollection(fetchedCollection);
-  }, [connection, wallet]);
+  }, [wallet, provider]);
 
   useEffect(() => {
     fetchCollection();
@@ -143,8 +142,8 @@ const CollectionProvider: React.FC = ({ children }) => {
     fetchUserAccount();
   }, [fetchUserAccount]);
 
-  const createAccount = useCallback(async () => {
-    if (!wallet.publicKey || !wallet.signTransaction || !collection) return;
+  const createAssociatedAccount = useCallback(async () => {
+    if (!wallet.publicKey || !collection) return;
 
     onOpen();
 
@@ -155,40 +154,87 @@ const CollectionProvider: React.FC = ({ children }) => {
       collectionKey,
       wallet.publicKey
     );
+
+    try {
+      await wallet.sendTransaction(
+        new anchor.web3.Transaction().add(
+          Token.createAssociatedTokenAccountInstruction(
+            ASSOCIATED_TOKEN_PROGRAM_ID,
+            TOKEN_PROGRAM_ID,
+            collectionKey,
+            associatedAddress,
+            wallet.publicKey,
+            wallet.publicKey
+          )
+        ),
+        connection
+      );
+
+      toast({
+        title: "Account created",
+        description: `Successfully created the associated token account`,
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+      });
+    } catch (err) {
+      console.log(err);
+      toast({
+        title: "Account creation failed",
+        description: `${err}`,
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
+      onClose();
+    }
+  }, [collection, connection, toast, wallet, onClose, onOpen]);
+
+  const createAccount = useCallback(async () => {
+    if (!wallet.publicKey || !wallet.signTransaction || !collection) return;
+
+    onOpen();
+
+    const collectionKey = new anchor.web3.PublicKey(collection.token);
     const tokenAccountAddress = await findTokenAddress(
       wallet.publicKey,
       collectionKey
     );
-    const instructions = [
-      Token.createAssociatedTokenAccountInstruction(
-        ASSOCIATED_TOKEN_PROGRAM_ID,
-        TOKEN_PROGRAM_ID,
-        collectionKey,
-        associatedAddress,
-        wallet.publicKey,
-        wallet.publicKey
-      ),
-      Token.createInitAccountInstruction(
-        TOKEN_PROGRAM_ID,
-        collectionKey,
-        tokenAccountAddress,
-        wallet.publicKey
-      ),
-    ];
 
     try {
-      const signature = await wallet.sendTransaction(
-        new anchor.web3.Transaction().add(...instructions),
+      await wallet.sendTransaction(
+        new anchor.web3.Transaction().add(
+          Token.createInitAccountInstruction(
+            TOKEN_PROGRAM_ID,
+            collectionKey,
+            tokenAccountAddress,
+            wallet.publicKey
+          )
+        ),
         connection
       );
-
-      setCurrentTransaction(signature);
+      toast({
+        title: "Account creation successful",
+        description: `Successfully created an account`,
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+      });
     } catch (err) {
       console.log(err);
+
+      toast({
+        title: "Account creation failed",
+        description: `Failed to created an account`,
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
     } finally {
       onClose();
     }
-  }, [collection, connection, wallet, onClose, onOpen]);
+  }, [collection, connection, toast, wallet, onClose, onOpen]);
 
   const claimToken = useCallback(
     async (mint: CollectionMint) => {
@@ -197,9 +243,6 @@ const CollectionProvider: React.FC = ({ children }) => {
 
       onOpen();
 
-      const provider = new anchor.Provider(connection, wallet as any, {
-        preflightCommitment: "processed",
-      });
       const program = new anchor.Program(
         idl as anchor.Idl,
         programID,
@@ -255,8 +298,8 @@ const CollectionProvider: React.FC = ({ children }) => {
       onClose();
     },
     [
-      connection,
       collection,
+      provider,
       toast,
       userAccount,
       wallet,
@@ -272,9 +315,6 @@ const CollectionProvider: React.FC = ({ children }) => {
 
       onOpen();
 
-      const provider = new anchor.Provider(connection, wallet as any, {
-        preflightCommitment: "processed",
-      });
       const program = new anchor.Program(
         idl as anchor.Idl,
         programID,
@@ -326,7 +366,7 @@ const CollectionProvider: React.FC = ({ children }) => {
       onClose();
     },
     [
-      connection,
+      provider,
       collection,
       toast,
       userAccount,
@@ -343,17 +383,14 @@ const CollectionProvider: React.FC = ({ children }) => {
         collection,
         mints,
         userAccount,
+        createAssociatedAccount,
         createAccount,
         claimToken,
         spendTokens,
       }}
     >
       {children}
-      <ConfirmationModal
-        isOpen={confirming}
-        onClose={onClose}
-        transaction={currentTransaction}
-      />
+      <ConfirmationModal isOpen={confirming} onClose={onClose} />
     </Context.Provider>
   );
 };

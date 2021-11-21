@@ -34,6 +34,7 @@ export interface ContextValues {
   collection?: Collection;
   mints: CollectionMint[];
   userAccount?: TokenAccount;
+  createAssociatedAccount: () => Promise<void>;
   createAccount: () => Promise<void>;
   claimToken: (mint: CollectionMint) => Promise<void>;
   spendTokens: (mint: CollectionMint, amount: anchor.BN) => Promise<void>;

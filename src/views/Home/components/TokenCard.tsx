@@ -23,7 +23,7 @@ interface TokenCardProps {
 
 const TokenCard: React.FC<TokenCardProps> = ({ token }) => {
   const wallet = useWallet();
-  const { userAccount, claimToken, spendTokens, createAccount } =
+  const { userAccount, claimToken, spendTokens, createAssociatedAccount } =
     useCollection();
 
   const [amount, setAmount] = useState(0);
@@ -93,7 +93,7 @@ const TokenCard: React.FC<TokenCardProps> = ({ token }) => {
                     ml="5px"
                     colorScheme="blue"
                     disabled={
-                      userAccount.amount.toString() === "0" || amount === 0
+                      userAccount.amount.toNumber() / (10**9) < amount || amount === 0
                     }
                     onClick={() =>
                       spendTokens(token, new anchor.BN(amount * 10 ** 9))
@@ -123,7 +123,7 @@ const TokenCard: React.FC<TokenCardProps> = ({ token }) => {
               </>
             ) : (
               <Flex>
-                <Button colorScheme="teal" onClick={createAccount} isFullWidth>
+                <Button colorScheme="teal" onClick={createAssociatedAccount} isFullWidth>
                   Initialize
                 </Button>
               </Flex>
