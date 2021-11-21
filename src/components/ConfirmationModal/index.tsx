@@ -14,13 +14,11 @@ import { useWallet } from "@solana/wallet-adapter-react";
 interface ConfirmationModalProps {
   isOpen: boolean;
   onClose: () => void;
-  transaction: string;
 }
 
 const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   isOpen,
-  onClose,
-  transaction,
+  onClose
 }) => {
   const wallet = useWallet();
 
@@ -33,7 +31,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
         <ModalBody>
           <VStack spacing="8px" my={2}>
             <Image src={wallet.wallet?.icon} w="100%" h="100%" />
-            <Spinner size="xl" />
+            <Spinner size="xl" thickness={"8px"} />
           </VStack>
         </ModalBody>
       </ModalContent>
