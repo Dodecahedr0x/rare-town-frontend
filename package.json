@@ -17,7 +17,7 @@
     "access": "public"
   },
   "scripts": {
-    "clean": "shx rm -rf build/*",
+    "clean": "rm -rf build/*",
     "start": "craco start",
     "build": "yarn clean && craco build",
     "test": "craco test",
