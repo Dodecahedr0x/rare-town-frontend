@@ -46,14 +46,19 @@ const CollectionProvider: React.FC = ({ children }) => {
 
     const program = new anchor.Program(idl as anchor.Idl, programID, provider);
 
-    const fetchedCollection = (await program.account.collection.fetch(
-      SOLSTEADS_COLLECTION
-    )) as any;
-    const zeroKey = new anchor.web3.PublicKey(0);
-    fetchedCollection.mints = fetchedCollection.mints.filter(
-      (item: CollectionItem) => !item.mint.equals(zeroKey)
-    );
-    setCollection(fetchedCollection);
+    try {
+      const fetchedCollection = (await program.account.collection.fetch(
+        SOLSTEADS_COLLECTION
+      )) as any;
+      const zeroKey = new anchor.web3.PublicKey(0);
+      fetchedCollection.mints = fetchedCollection.mints.filter(
+        (item: CollectionItem) => !item.mint.equals(zeroKey)
+      );
+      setCollection(fetchedCollection);
+    } catch (err) {
+      console.log("Failed fetching collection, retrying in 1 second")
+      setTimeout(() => fetchCollection(), 1000)
+    }
   }, [wallet, provider]);
 
   useEffect(() => {
@@ -124,7 +129,7 @@ const CollectionProvider: React.FC = ({ children }) => {
 
               success = true;
             } catch (err) {
-              await new Promise((r, _) => setTimeout(r, 1000))
+              await new Promise((r, _) => setTimeout(r, 1000));
             }
           }
           resolve(undefined);

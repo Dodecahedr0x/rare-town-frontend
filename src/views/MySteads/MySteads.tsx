@@ -46,9 +46,9 @@ const MySteads: React.FC = () => {
       ) : (
         <Box justify="center" align="center" width="100%" my="40px">
           <Text fontSize="xl" align="center">
-            <b>Loading adventurers...</b>
+            <b>Loading steads...</b>
           </Text>
-          <Spinner size="xl" color="pink.400" thickness={"8px"} />
+          <Spinner size="xl" thickness={"8px"} />
         </Box>
       )}
     </Flex>

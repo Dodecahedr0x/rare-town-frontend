@@ -21,10 +21,13 @@ interface WalletModalProps {
 const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose }) => {
   const wallet = useWallet();
 
-  const handleChooseWallet = useCallback(async (walletName: WalletName) => {
-    wallet.select(walletName)
-    wallet.connect()
-  }, [wallet])
+  const handleChooseWallet = useCallback(
+    async (walletName: WalletName) => {
+      wallet.select(walletName);
+      setTimeout(() => wallet.connect(), 1000)
+    },
+    [wallet]
+  );
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
@@ -40,11 +43,7 @@ const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose }) => {
                 width="100%"
                 py={2}
                 leftIcon={
-                  <Image
-                    src={wallet.icon}
-                    alt={wallet.name}
-                    width={8}
-                  />
+                  <Image src={wallet.icon} alt={wallet.name} width={8} />
                 }
                 onClick={() => handleChooseWallet(wallet.name)}
               >
