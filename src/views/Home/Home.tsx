@@ -6,6 +6,7 @@ import {
   Flex,
   Select,
   Spinner,
+  Tag,
   Text,
   Wrap,
 } from "@chakra-ui/react";
@@ -79,6 +80,7 @@ const Home: React.FC = () => {
           <Spinner size="xl" thickness={"8px"} />
         </Box>
       )}
+      <Tag my="10px" color="teal">Made with ❤️ by <a href="https://twitter.com/Dodecahedr0x" target="_blank" rel="noreferrer">@Dodecahedr0x</a>. Donate to UuGEwN9aeh676ufphbavfssWVxH7BJCqacq1RYhco8e</Tag>
     </Flex>
   );
 };
