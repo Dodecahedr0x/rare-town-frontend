@@ -27,6 +27,8 @@ const Home: React.FC = () => {
     setPageSize,
   } = usePaginatedCollection();
 
+  console.log(mints)
+
   return (
     <Flex direction="column" w="100%" align="center" p="10px">
       {collection ? (

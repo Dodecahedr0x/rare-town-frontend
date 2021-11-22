@@ -18,8 +18,6 @@ const MySteads: React.FC = () => {
     return allMints.filter((e) => e.owned);
   }, [allMints]);
 
-  console.log(allMints, mints);
-
   return (
     <Flex direction="column" w="100%" align="center" p="10px">
       {collection ? (

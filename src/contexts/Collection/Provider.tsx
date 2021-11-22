@@ -33,9 +33,13 @@ const CollectionProvider: React.FC = ({ children }) => {
   const [collection, setCollection] = useState<Collection>();
   const [mints, setMints] = useState<CollectionMint[]>([]);
 
-  const provider = useMemo(() => new anchor.Provider(connection, wallet as any, {
-    preflightCommitment: "confirmed",
-  }), [connection, wallet])
+  const provider = useMemo(
+    () =>
+      new anchor.Provider(connection, wallet as any, {
+        preflightCommitment: "confirmed",
+      }),
+    [connection, wallet]
+  );
 
   const fetchCollection = useCallback(async () => {
     if (!wallet) return;
@@ -87,27 +91,45 @@ const CollectionProvider: React.FC = ({ children }) => {
           .toNumber()
       );
 
+    const promises = [];
+
     for (const i in ranks) {
-      const pda = await programs.metadata.Metadata.getPDA(
-        collection.mints[ranks[i]].mint
+      promises.push(
+        new Promise(async (resolve, reject) => {
+          let success = false;
+          while (!success) {
+            try {
+              const pda = await programs.metadata.Metadata.getPDA(
+                collection.mints[ranks[i]].mint
+              );
+              const fetchedMetadata = await programs.metadata.Metadata.load(
+                connection,
+                pda
+              );
+              const response = await axios.get(fetchedMetadata.data.data.uri);
+              setMints((old) => {
+                let array = old?.slice();
+                array[i] = {
+                  mint: collection.mints[ranks[i]],
+                  rank: Number(i),
+                  imageUri: response.data.image,
+                  solsteadsUrl: response.data.external_url,
+                  metadata: fetchedMetadata,
+                  owned: ownedTokens.includes(
+                    fetchedMetadata.pubkey.toString()
+                  ),
+                };
+                return array;
+              });
+
+              success = true;
+            } catch (err) {
+              await new Promise((r, _) => setTimeout(r, 1000))
+            }
+          }
+          resolve(undefined);
+        })
       );
-      const fetchedMetadata = await programs.metadata.Metadata.load(
-        connection,
-        pda
-      );
-      const response = await axios.get(fetchedMetadata.data.data.uri);
-      setMints((old) => {
-        let array = old?.slice();
-        array[i] = {
-          mint: collection.mints[ranks[i]],
-          rank: Number(i),
-          imageUri: response.data.image,
-          solsteadsUrl: response.data.external_url,
-          metadata: fetchedMetadata,
-          owned: ownedTokens.includes(fetchedMetadata.pubkey.toString()),
-        };
-        return array;
-      });
     }
   }, [connection, collection, ownedTokens]);
 
