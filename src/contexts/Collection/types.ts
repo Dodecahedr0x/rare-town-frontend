@@ -1,4 +1,3 @@
-import { Metadata } from "@metaplex/js/lib/programs/metadata";
 import { PublicKey } from "@solana/web3.js";
 import * as anchor from "@project-serum/anchor";
 import { AccountInfo as TokenAccount } from "@solana/spl-token";
@@ -24,9 +23,9 @@ export interface CollectionItem {
 export interface CollectionMint {
   mint: CollectionItem;
   rank: number;
-  imageUri: string;
-  solsteadsUrl: string;
-  metadata: Metadata;
+  imageUri?: string;
+  solsteadsUrl?: string;
+  metadata?: { name: string };
   owned: boolean;
 }
 
@@ -38,4 +37,5 @@ export interface ContextValues {
   createAccount: () => Promise<void>;
   claimToken: (mint: CollectionMint) => Promise<void>;
   spendTokens: (mint: CollectionMint, amount: anchor.BN) => Promise<void>;
+  fetchMint: (mint: CollectionMint) => CollectionMint;
 }

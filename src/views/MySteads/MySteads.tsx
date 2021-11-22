@@ -9,7 +9,7 @@ import {
 } from "@chakra-ui/react";
 
 import useCollection from "../../hooks/useCollection";
-import { TokenCard } from "./components";
+import TokenCard from "../../components/TokenCard";
 
 const MySteads: React.FC = () => {
   const { collection, mints: allMints } = useCollection();
@@ -37,7 +37,7 @@ const MySteads: React.FC = () => {
                 margin="auto"
               >
                 {mints.map((item, i) => (
-                  <TokenCard key={item.imageUri + item.rank} token={item} />
+                  <TokenCard key={item.mint.mint.toString() + item.rank} token={item} />
                 ))}
               </Wrap>
             </Box>

@@ -14,11 +14,12 @@ import { Collection, CollectionItem, CollectionMint } from ".";
 import idl from "../../constants/idls/collection.json";
 
 import Context from "./Context";
-import axios from "axios";
 import ConfirmationModal from "components/ConfirmationModal";
 import { useDisclosure, useToast } from "@chakra-ui/react";
 import { SOLSTEADS_COLLECTION } from "../../constants";
 import { findAssociatedTokenAddress, findTokenAddress } from "utils";
+
+import allMetadata from "../../constants/all_metadata.json";
 
 const programID = new PublicKey(idl.metadata.address);
 
@@ -36,7 +37,7 @@ const CollectionProvider: React.FC = ({ children }) => {
   const provider = useMemo(
     () =>
       new anchor.Provider(connection, wallet as any, {
-        preflightCommitment: "confirmed",
+        preflightCommitment: "processed",
       }),
     [connection, wallet]
   );
@@ -54,10 +55,11 @@ const CollectionProvider: React.FC = ({ children }) => {
       fetchedCollection.mints = fetchedCollection.mints.filter(
         (item: CollectionItem) => !item.mint.equals(zeroKey)
       );
+      console.log(fetchedCollection);
       setCollection(fetchedCollection);
     } catch (err) {
-      console.log("Failed fetching collection, retrying in 1 second")
-      setTimeout(() => fetchCollection(), 1000)
+      console.log("Failed fetching collection, retrying in 1 second");
+      setTimeout(() => fetchCollection(), 1000);
     }
   }, [wallet, provider]);
 
@@ -84,6 +86,30 @@ const CollectionProvider: React.FC = ({ children }) => {
     fetchOwned();
   }, [fetchOwned]);
 
+  const fetchMint = useCallback(
+    (mint: CollectionMint) => {
+      if (!collection || !connection) return mint;
+
+      const i = collection.mints
+        .map((e) => e.mint.toString())
+        .indexOf(mint.mint.mint.toString());
+
+      const metadata = (allMetadata as { [key: string]: any })[
+        mint.mint.mint.toString()
+      ];
+
+      return {
+        mint: mint.mint,
+        rank: Number(i),
+        imageUri: metadata.properties.files[1].uri,
+        solsteadsUrl: metadata.external_url,
+        metadata: metadata,
+        owned: ownedTokens.includes(mint.mint.mint.toString()),
+      }
+    },
+    [connection, collection, ownedTokens]
+  );
+
   const fetchMints = useCallback(async () => {
     if (!collection || !connection) return;
 
@@ -96,46 +122,16 @@ const CollectionProvider: React.FC = ({ children }) => {
           .toNumber()
       );
 
-    const promises = [];
-
+    const newMints: CollectionMint[] = [];
     for (const i in ranks) {
-      promises.push(
-        new Promise(async (resolve, reject) => {
-          let success = false;
-          while (!success) {
-            try {
-              const pda = await programs.metadata.Metadata.getPDA(
-                collection.mints[ranks[i]].mint
-              );
-              const fetchedMetadata = await programs.metadata.Metadata.load(
-                connection,
-                pda
-              );
-              const response = await axios.get(fetchedMetadata.data.data.uri);
-              setMints((old) => {
-                let array = old?.slice();
-                array[i] = {
-                  mint: collection.mints[ranks[i]],
-                  rank: Number(i),
-                  imageUri: response.data.image,
-                  solsteadsUrl: response.data.external_url,
-                  metadata: fetchedMetadata,
-                  owned: ownedTokens.includes(
-                    fetchedMetadata.pubkey.toString()
-                  ),
-                };
-                return array;
-              });
-
-              success = true;
-            } catch (err) {
-              await new Promise((r, _) => setTimeout(r, 1000));
-            }
-          }
-          resolve(undefined);
-        })
-      );
+      newMints.push({
+        mint: collection.mints[ranks[i]],
+        rank: Number(i),
+        owned: ownedTokens.includes(collection.mints[ranks[i]].mint.toString()),
+      });
     }
+
+    setMints(newMints);
   }, [connection, collection, ownedTokens]);
 
   useEffect(() => {
@@ -302,7 +298,7 @@ const CollectionProvider: React.FC = ({ children }) => {
 
         toast({
           title: "Claim successful",
-          description: `Successfully claimed $TOWN for "${mint.metadata.data.data.name}"`,
+          description: `Successfully claimed $TOWN for "${mint.metadata?.name}"`,
           status: "success",
           duration: 5000,
           isClosable: true,
@@ -370,7 +366,7 @@ const CollectionProvider: React.FC = ({ children }) => {
           title: "Spending successful",
           description: `Successfully gave ${
             amount.toNumber() / 10 ** 9
-          } $TOWN for "${mint.metadata.data.data.name}"`,
+          } $TOWN for "${mint.metadata?.name}"`,
           status: "success",
           duration: 5000,
           isClosable: true,
@@ -414,6 +410,7 @@ const CollectionProvider: React.FC = ({ children }) => {
         createAccount,
         claimToken,
         spendTokens,
+        fetchMint,
       }}
     >
       {children}

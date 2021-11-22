@@ -12,7 +12,7 @@ import {
 } from "@chakra-ui/react";
 
 import useCollection from "../../hooks/useCollection";
-import { TokenCard } from "./components";
+import TokenCard from "../../components/TokenCard";
 import usePaginatedCollection from "hooks/usePaginatedCollection";
 import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
 
@@ -27,8 +27,6 @@ const Home: React.FC = () => {
     setPageSize,
   } = usePaginatedCollection();
 
-  console.log(mints)
-
   return (
     <Flex direction="column" w="100%" align="center" p="10px">
       {collection ? (
@@ -41,7 +39,7 @@ const Home: React.FC = () => {
             margin="auto"
           >
             {mints.map((item, i) => (
-              <TokenCard key={item.imageUri + item.rank} token={item} />
+              <TokenCard key={item.mint.mint.toString() + item.rank} token={item} />
             ))}
           </Wrap>
           <ButtonGroup variant="outline" isAttached spacing="6" m="10px">
