@@ -21,6 +21,7 @@ const Home: React.FC = () => {
   const {
     mints,
     currentPage,
+    pageSize,
     isLastPage,
     previousPage,
     nextPage,
@@ -34,7 +35,7 @@ const Home: React.FC = () => {
           <Wrap
             align="center"
             justify="center"
-            w="80%"
+            w="95%"
             direction="row"
             margin="auto"
           >
@@ -65,7 +66,7 @@ const Home: React.FC = () => {
           </ButtonGroup>
           <Box w="100px">
             <Text>Page Size</Text>
-            <Select onChange={(e) => setPageSize(Number(e.target.value))}>
+            <Select onChange={(e) => setPageSize(Number(e.target.value))} value={pageSize}>
               <option value="25">25</option>
               <option value="50">50</option>
               <option value="100">100</option>
