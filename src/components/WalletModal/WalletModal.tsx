@@ -22,9 +22,8 @@ const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose }) => {
   const wallet = useWallet();
 
   const handleChooseWallet = useCallback(
-    async (walletName: WalletName) => {
+    (walletName: WalletName) => {
       wallet.select(walletName);
-      setTimeout(() => wallet.connect(), 1000)
     },
     [wallet]
   );

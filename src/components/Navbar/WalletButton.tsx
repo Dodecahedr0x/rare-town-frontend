@@ -18,6 +18,12 @@ const WalletButton: React.FC = () => {
     }
   }, [wallet, onClose]);
 
+  useEffect(() => {
+    if(wallet.wallet) {
+      wallet.connect()
+    }
+  }, [wallet])
+
   return (
     <>
       <WalletModal isOpen={isOpen} onClose={onClose} />
