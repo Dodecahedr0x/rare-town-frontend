@@ -23,13 +23,11 @@ import Home from "./views/Home";
 import { CollectionProvider } from "contexts/Collection";
 import MySteads from "views/MySteads";
 
-const Providers: React.FC = ({ children }) => {
+const WalletProviders: React.FC = ({ children }) => {
   const network = WalletAdapterNetwork.Mainnet;
   const endpoint = useMemo(() => clusterApiUrl(network), [network]);
   const toast = useToast();
 
-  // @solana/wallet-adapter-wallets imports all the adapters but supports tree shaking --
-  // Only the wallets you want to support will be compiled into your application
   const wallets = useMemo(
     () => [
       getPhantomWallet(),
@@ -60,14 +58,20 @@ const Providers: React.FC = ({ children }) => {
   );
 
   return (
+    <ConnectionProvider endpoint={endpoint}>
+      <WalletProvider wallets={wallets} onError={onError}>
+        <WalletModalProvider>{children}</WalletModalProvider>
+      </WalletProvider>
+    </ConnectionProvider>
+  );
+};
+
+const Providers: React.FC = ({ children }) => {
+  return (
     <ChakraProvider>
-      <ConnectionProvider endpoint={endpoint}>
-        <WalletProvider wallets={wallets} onError={onError}>
-          <WalletModalProvider>
-            <CollectionProvider>{children}</CollectionProvider>
-          </WalletModalProvider>
-        </WalletProvider>
-      </ConnectionProvider>
+      <WalletProviders>
+        <CollectionProvider>{children}</CollectionProvider>
+      </WalletProviders>
     </ChakraProvider>
   );
 };
