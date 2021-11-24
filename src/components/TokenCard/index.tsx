@@ -54,7 +54,7 @@ const TokenCard: React.FC<TokenCardProps> = ({ token }) => {
 
   return (
     <Flex
-      maxW="350px"
+      w="280px"
       direction="column"
       alignItems="center"
       justifyContent="center"
@@ -62,8 +62,8 @@ const TokenCard: React.FC<TokenCardProps> = ({ token }) => {
       rounded="lg"
       shadow="lg"
     >
-      <Image src={augmentedToken.imageUri} rounded="lg" maxW="280px" maxH="400px" />
-      <Text fontSize="2xl" fontWeight="bold" maxW="280px">
+      <Image src={augmentedToken.imageUri} rounded="lg" w="280px" maxH="400px" />
+      <Text fontSize="2xl" fontWeight="bold" w="280px">
         {augmentedToken.metadata?.name}
       </Text>
       <Divider />
