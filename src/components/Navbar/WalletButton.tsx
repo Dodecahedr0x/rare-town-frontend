@@ -9,33 +9,29 @@ import useCollection from "../../hooks/useCollection";
 
 const WalletButton: React.FC = () => {
   const { isOpen, onClose, onOpen } = useDisclosure();
-  const wallet = useWallet();
+  const { connected, publicKey, disconnect } = useWallet();
   const { userAccount } = useCollection();
 
   useEffect(() => {
-    if (wallet.connected) {
+    if (connected) {
       onClose();
     }
-  }, [wallet, onClose]);
-
-  useEffect(() => {
-    if(wallet.wallet) {
-      wallet.connect()
-    }
-  }, [wallet])
+  }, [connected, onClose]);
 
   return (
     <>
       <WalletModal isOpen={isOpen} onClose={onClose} />
-      {wallet.connected ? (
+      {connected ? (
         <>
           {userAccount && (
             <Tag size="lg" variant="subtle" colorScheme="cyan">
-              <TagLabel>{userAccount.amount.toNumber() / 10 ** 9} $TOWN</TagLabel>
+              <TagLabel>
+                {userAccount.amount.toNumber() / 10 ** 9} $TOWN
+              </TagLabel>
             </Tag>
           )}
-          <Button onClick={wallet.disconnect}>
-            {shortAddress(wallet.publicKey?.toString())}
+          <Button onClick={disconnect}>
+            {shortAddress(publicKey?.toString())}
           </Button>
         </>
       ) : (

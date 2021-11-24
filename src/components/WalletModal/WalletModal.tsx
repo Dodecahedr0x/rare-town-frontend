@@ -24,6 +24,7 @@ const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose }) => {
   const handleChooseWallet = useCallback(
     (walletName: WalletName) => {
       wallet.select(walletName);
+      wallet.adapter?.connect()
     },
     [wallet]
   );
