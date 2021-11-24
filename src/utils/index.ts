@@ -2,23 +2,8 @@ import * as anchor from "@project-serum/anchor"
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   TOKEN_PROGRAM_ID,
-  Token,
-  AccountInfo as TokenAccount,
-  AccountLayout
+  Token
 } from "@solana/spl-token";
-import { WRAPPED_SOL_MINT } from "../constants";
-
-const accountsCache = new Map<string, TokenAccount>();
-
-export const getCachedAccount = (
-  predicate: (account: TokenAccount) => boolean
-) => {
-  for (const account of accountsCache.values()) {
-    if (predicate(account)) {
-      return account as TokenAccount;
-    }
-  }
-};
 
 export const createSplAccount = async(
   instructions: anchor.web3.TransactionInstruction[],
@@ -82,57 +67,4 @@ export const findAssociatedTokenAddress = async (
       ],
       ASSOCIATED_TOKEN_PROGRAM_ID
   ))[0];
-}
-
-export const findOrCreateAccountByMint = async (
-  payer: anchor.web3.PublicKey,
-  owner: anchor.web3.PublicKey,
-  instructions: anchor.web3.TransactionInstruction[],
-  cleanupInstructions: anchor.web3.TransactionInstruction[],
-  accountRentExempt: number,
-  mint: anchor.web3.PublicKey, // use to identify same type
-  signers: anchor.web3.Keypair[],
-  excluded?: Set<string>
-): Promise<anchor.web3.PublicKey> => {
-  const accountToFind = mint.toBase58();
-  const account = getCachedAccount(
-    (acc) =>
-      acc.mint.toBase58() === accountToFind &&
-      acc.owner.toBase58() === owner.toBase58() &&
-      (excluded === undefined || !excluded.has(acc.address.toBase58()))
-  );
-  const isWrappedSol = accountToFind === WRAPPED_SOL_MINT.toBase58();
-
-  let toAccount: anchor.web3.PublicKey;
-  if (account && !isWrappedSol) {
-    toAccount = account.address;
-  } else {
-    // creating depositor pool account
-    const newToAccount = await createSplAccount(
-      instructions,
-      payer,
-      accountRentExempt,
-      mint,
-      owner,
-      AccountLayout.span
-    );
-
-    toAccount = newToAccount;
-    console.log("to account", newToAccount.toString())
-    // signers.push(newToAccount);
-
-    if (isWrappedSol) {
-      cleanupInstructions.push(
-        Token.createCloseAccountInstruction(
-          TOKEN_PROGRAM_ID,
-          toAccount,
-          payer,
-          payer,
-          []
-        )
-      );
-    }
-  }
-
-  return toAccount;
 }

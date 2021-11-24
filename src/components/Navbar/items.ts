@@ -10,23 +10,23 @@ const NAV_ITEMS: Array<NavItem> = [
     href: "#/mysteads"
   },
   {
-    label: "Ressources",
+    label: "Resources",
     children: [
       {
-        label: "RareTown programs on GitHub",
+        label: "RareTown Programs On GitHub",
         subLabel: "Solana program repo",
         href: "https://github.com/Dodecahedr0x/rare-town-programs",
         newTab: true,
       },
       {
-        label: "RareTown front-end on GitHub",
+        label: "RareTown Front-End On GitHub",
         subLabel: "Front-end repo",
         href: "https://github.com/Dodecahedr0x/rare-town-frontend",
         newTab: true,
       },
       {
         label: "SolSteads",
-        subLabel: "SolSteads official website",
+        subLabel: "SolSteads Official Website",
         href: "https://solsteads.com/",
         newTab: true,
       },
