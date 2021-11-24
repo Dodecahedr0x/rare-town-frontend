@@ -30,6 +30,7 @@ const CollectionProvider: React.FC = ({ children }) => {
 
   const { isOpen: confirming, onOpen, onClose } = useDisclosure();
   const [ownedTokens, setOwnedTokens] = useState<string[]>([]);
+  const [isFetchingOwned, setIsFetchingOwned] = useState<boolean>(false);
   const [userAccount, setUserAccount] = useState<TokenAccount>();
   const [collection, setCollection] = useState<Collection>();
   const [mints, setMints] = useState<CollectionMint[]>([]);
@@ -68,23 +69,25 @@ const CollectionProvider: React.FC = ({ children }) => {
   }, [fetchCollection]);
 
   const fetchOwned = useCallback(async () => {
-    if (!wallet || !collection || !wallet.publicKey) {
-      setOwnedTokens([]);
-    } else {
-      setOwnedTokens(
-        (
-          await programs.metadata.Metadata.findByOwnerV2(
-            connection,
-            wallet.publicKey
-          )
-        ).map((e) => e.pubkey.toString())
-      );
-    }
-  }, [connection, collection, wallet]);
+    if (!wallet.publicKey || !collection || isFetchingOwned) return;
+
+    setIsFetchingOwned(true);
+
+    setOwnedTokens(
+      (
+        await programs.metadata.Metadata.findByOwnerV2(
+          connection,
+          wallet.publicKey
+        )
+      ).map((e) => e.pubkey.toString())
+    );
+
+    setIsFetchingOwned(false);
+  }, [wallet.publicKey, connection, collection, isFetchingOwned]);
 
   useEffect(() => {
     fetchOwned();
-  }, [fetchOwned]);
+  }, [fetchOwned, wallet, collection, setIsFetchingOwned]);
 
   const fetchMint = useCallback(
     (mint: CollectionMint) => {
@@ -105,7 +108,7 @@ const CollectionProvider: React.FC = ({ children }) => {
         solsteadsUrl: metadata.external_url,
         metadata: metadata,
         owned: ownedTokens.includes(mint.mint.mint.toString()),
-      }
+      };
     },
     [connection, collection, ownedTokens]
   );
@@ -403,6 +406,7 @@ const CollectionProvider: React.FC = ({ children }) => {
   return (
     <Context.Provider
       value={{
+        isFetchingOwned,
         collection,
         mints,
         userAccount,

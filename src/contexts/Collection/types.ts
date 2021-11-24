@@ -30,6 +30,7 @@ export interface CollectionMint {
 }
 
 export interface ContextValues {
+  isFetchingOwned: boolean;
   collection?: Collection;
   mints: CollectionMint[];
   userAccount?: TokenAccount;

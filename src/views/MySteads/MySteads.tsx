@@ -12,7 +12,7 @@ import useCollection from "../../hooks/useCollection";
 import TokenCard from "../../components/TokenCard";
 
 const MySteads: React.FC = () => {
-  const { collection, mints: allMints } = useCollection();
+  const { collection, mints: allMints, isFetchingOwned } = useCollection();
 
   const mints = useMemo(() => {
     return allMints.filter((e) => e.owned);
@@ -20,7 +20,7 @@ const MySteads: React.FC = () => {
 
   return (
     <Flex direction="column" w="100%" align="center" p="10px">
-      {collection ? (
+      {collection && !isFetchingOwned ? (
         <Box justify="center" align="center" w="full">
           {mints.length === 0 ? (
             <Box my="20px">
@@ -46,7 +46,7 @@ const MySteads: React.FC = () => {
       ) : (
         <Box justify="center" align="center" width="100%" my="40px">
           <Text fontSize="xl" align="center">
-            <b>Loading steads...</b>
+            <b>Loading your steads...</b>
           </Text>
           <Spinner size="xl" thickness={"8px"} />
         </Box>

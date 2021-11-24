@@ -4,6 +4,7 @@ import { CollectionMint } from ".";
 import { ContextValues } from "./types";
 
 const Context = createContext<ContextValues>({
+    isFetchingOwned: false,
     mints: [],
     createAssociatedAccount: () => new Promise(() => {}),
     createAccount: () => new Promise(() => {}),
