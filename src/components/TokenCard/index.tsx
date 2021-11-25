@@ -50,7 +50,7 @@ const TokenCard: React.FC<TokenCardProps> = ({ token }) => {
     return () => clearTimeout(timer);
   });
 
-  const augmentedToken = useMemo(() => fetchMint(token), [token, fetchMint])
+  const augmentedToken = useMemo(() => fetchMint(token), [token, fetchMint]);
 
   return (
     <Flex
@@ -62,13 +62,20 @@ const TokenCard: React.FC<TokenCardProps> = ({ token }) => {
       rounded="lg"
       shadow="lg"
     >
-      <Image src={augmentedToken.imageUri} rounded="lg" w="280px" maxH="400px" />
+      <Image
+        src={augmentedToken.imageUri}
+        rounded="lg"
+        w="280px"
+        maxH="400px"
+      />
       <Text fontSize="2xl" fontWeight="bold" w="280px">
         {augmentedToken.metadata?.name}
       </Text>
       <Divider />
       <VStack spacing="8px" w="100%" p="15px">
-        <Text fontSize="lg" fontWeight="bold">Rank {augmentedToken.rank + 1}</Text>
+        <Text fontSize="lg" fontWeight="bold">
+          Rank {augmentedToken.rank + 1}
+        </Text>
         <Flex direction="row" w="100%">
           <Box>
             <Text fontSize="lg" fontWeight="bold">
@@ -83,8 +90,10 @@ const TokenCard: React.FC<TokenCardProps> = ({ token }) => {
           </Box>
         </Flex>
         <Box>
-          <Link href={augmentedToken.solsteadsUrl} target="_blank">Check on Solsteads</Link>
-          </Box>
+          <Link href={augmentedToken.solsteadsUrl} target="_blank">
+            Check on Solsteads
+          </Link>
+        </Box>
         {wallet.connected && (
           <>
             {userAccount ? (
@@ -95,10 +104,14 @@ const TokenCard: React.FC<TokenCardProps> = ({ token }) => {
                     ml="5px"
                     colorScheme="blue"
                     disabled={
-                      userAccount.amount.toNumber() / (10**9) < amount || amount === 0
+                      userAccount.amount.toNumber() / 10 ** 9 < amount ||
+                      amount === 0
                     }
                     onClick={() =>
-                      spendTokens(augmentedToken, new anchor.BN(amount * 10 ** 9))
+                      spendTokens(
+                        augmentedToken,
+                        new anchor.BN(amount * 10 ** 9)
+                      )
                     }
                   >
                     Give
