@@ -16,10 +16,7 @@ import Context from "./Context";
 import ConfirmationModal from "components/ConfirmationModal";
 import { useDisclosure, useToast } from "@chakra-ui/react";
 import { SOLSTEADS_COLLECTION } from "../../constants";
-import {
-  findDataByOwner,
-  findTokenAddress,
-} from "utils";
+import { findDataByOwner, findTokenAddress } from "utils";
 
 import allMetadata from "../../constants/all_metadata.json";
 
@@ -51,13 +48,12 @@ const CollectionProvider: React.FC = ({ children }) => {
     const program = new anchor.Program(idl as anchor.Idl, programID, provider);
 
     try {
-      const fetchedCollection = (await program.account.collection.fetch(
-        SOLSTEADS_COLLECTION
-      )) as any;
+      const fetchedCollection: Collection =
+        (await program.account.collection.fetch(SOLSTEADS_COLLECTION)) as any;
       const zeroKey = new anchor.web3.PublicKey(0);
-      fetchedCollection.mints = fetchedCollection.mints.filter(
-        (item: CollectionItem) => !item.mint.equals(zeroKey)
-      );
+      fetchedCollection.mints = fetchedCollection.mints
+        .filter((item: CollectionItem) => !item.mint.equals(zeroKey))
+        .sort((a, b) => b.received.sub(a.received).toNumber());
       setCollection(fetchedCollection);
     } catch (err) {
       console.log("Failed fetching collection, retrying in 1 second");
@@ -88,6 +84,9 @@ const CollectionProvider: React.FC = ({ children }) => {
     if (!isFetchingOwned && ownedTokens.length === 0) fetchOwned();
   }, [fetchOwned, isFetchingOwned, ownedTokens]);
 
+  /**
+   * Updates data for a specific token
+   */
   const fetchMint = useCallback(
     (mint: CollectionMint) => {
       if (!collection || !connection) return mint;
@@ -398,7 +397,7 @@ const CollectionProvider: React.FC = ({ children }) => {
           isClosable: true,
         });
 
-        // Update balance
+        // Update collection
         await fetchCollection();
       } catch (err: any) {
         console.log("Failed claiming tokens", err, Object.keys(err));
