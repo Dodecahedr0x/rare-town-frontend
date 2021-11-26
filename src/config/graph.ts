@@ -1,1 +1,0 @@
-export const graph = "https://api.thegraph.com/subgraphs/name/eabz/rarity"
