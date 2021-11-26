@@ -22,6 +22,7 @@ import Navbar from "./components/Navbar";
 import Home from "./views/Home";
 import { CollectionProvider } from "contexts/Collection";
 import MySteads from "views/MySteads";
+import Leaderboard from "views/Leaderboard";
 
 const WalletProviders: React.FC = ({ children }) => {
   const network = WalletAdapterNetwork.Mainnet;
@@ -83,6 +84,7 @@ function App() {
         <Navbar />
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/mysteads" element={<MySteads />} />
         </Routes>
       </Router>

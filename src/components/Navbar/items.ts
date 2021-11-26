@@ -2,8 +2,12 @@ import { NavItem } from "./types";
 
 const NAV_ITEMS: Array<NavItem> = [
   {
-    label: "Leaderboard",
+    label: "Home",
     href: "#/"
+  },
+  {
+    label: "Leaderboard",
+    href: "#/leaderboard"
   },
   {
     label: "My Steads",

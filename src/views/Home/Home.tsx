@@ -1,142 +1,88 @@
-import React, { useCallback, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
-  Box,
   Button,
-  ButtonGroup,
   Flex,
-  Select,
-  Spinner,
-  Tag,
+  Heading,
+  Container,
+  Image,
+  Stack,
   Text,
-  Wrap,
+  SkeletonCircle,
 } from "@chakra-ui/react";
 
-import useCollection from "../../hooks/useCollection";
-import TokenCard from "../../components/TokenCard";
-import usePaginatedCollection, {
-  SteadFilter,
-} from "hooks/usePaginatedCollection";
-import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
-import { getAllAttributes } from "utils";
-
-const allAttributes = getAllAttributes();
+import allMetadata from "../../assets/all_metadata.json";
+import { Link } from "react-router-dom";
 
 const Home: React.FC = () => {
-  const [filters, setFilters] = useState<SteadFilter>({});
-  const [, updateState] = React.useState<Object>();
-  const forceUpdate = React.useCallback(() => updateState({}), []);
+  const [currentImage, setCurrentImage] = useState<string>();
 
-  const { collection } = useCollection();
-  const {
-    mints,
-    currentPage,
-    pageSize,
-    isLastPage,
-    previousPage,
-    nextPage,
-    setPageSize,
-  } = usePaginatedCollection(filters);
-
-  const handleSetFilter = useCallback(
-    (attributeType: string, value?: string) => {
-      console.log(attributeType, value);
-      setFilters((old) => {
-        // TODO: allow multiple filters
-        if (!value) delete old[attributeType];
-        else old[attributeType] = [value];
-        return old;
-      });
-      forceUpdate()
-    },
-    [forceUpdate]
-  );
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const keys = Object.keys(allMetadata);
+      const randomIndex = Math.round(Math.random() * keys.length);
+      const image = (allMetadata as any)[keys[randomIndex]].properties.files[1]
+        .uri;
+      setCurrentImage(image);
+    }, 500);
+    return () => clearTimeout(interval);
+  }, []);
 
   return (
-    <Flex direction="column" w="100%" align="center" p="10px">
-      <Wrap direction="row" justify="center" mb="10px">
-        {Object.keys(allAttributes).map((attributeType) => (
-          <Box key={attributeType}>
-            <Text>{attributeType}</Text>
-            <Select
-              onChange={(e) => handleSetFilter(attributeType, e.target.value)}
-            >
-              <option value={undefined}></option>
-              {allAttributes[attributeType].values.map((attribute) => (
-                <option key={attribute} value={attribute}>{attribute}</option>
-              ))}
-            </Select>
-          </Box>
-        ))}
-      </Wrap>
-      {collection ? (
-        <Box justify="center" align="center" w="full">
-          <Wrap
-            align="center"
-            justify="center"
-            w="95%"
-            direction="row"
-            margin="auto"
-          >
-            {mints.map((item, i) => (
-              <TokenCard
-                key={item.mint.mint.toString() + item.rank}
-                token={item}
-              />
-            ))}
-          </Wrap>
-          <ButtonGroup variant="outline" isAttached spacing="6" m="10px">
-            <Button
-              w="100px"
-              colorScheme="blue"
-              onClick={previousPage}
-              disabled={currentPage === 0}
-              leftIcon={<ChevronLeftIcon />}
-            >
-              Previous
-            </Button>
-            <Button as={Box}>{currentPage + 1}</Button>
-            <Button
-              w="100px"
-              colorScheme="blue"
-              onClick={nextPage}
-              disabled={isLastPage}
-              rightIcon={<ChevronRightIcon />}
-            >
-              Next
-            </Button>
-          </ButtonGroup>
-          <Box w="100px">
-            <Text>Page Size</Text>
-            <Select
-              onChange={(e) => setPageSize(Number(e.target.value))}
-              value={pageSize}
-            >
-              <option value="25">25</option>
-              <option value="50">50</option>
-              <option value="100">100</option>
-            </Select>
-          </Box>
-        </Box>
-      ) : (
-        <Box justify="center" align="center" width="100%" my="40px">
-          <Text fontSize="xl" align="center">
-            <b>Loading tokens...</b>
-          </Text>
-          <Spinner size="xl" thickness={"8px"} />
-        </Box>
-      )}
-      <Tag my="10px" color="teal">
-        Made with ❤️ by{" "}
-        <a
-          href="https://twitter.com/Dodecahedr0x"
-          target="_blank"
-          rel="noreferrer"
+    <Container maxW={"5xl"}>
+      <Stack
+        textAlign={"center"}
+        align={"center"}
+        spacing={{ base: 8, md: 10 }}
+        py={{ base: 20, md: 28 }}
+      >
+        <Heading
+          fontWeight={600}
+          fontSize={{ base: "3xl", sm: "4xl", md: "6xl" }}
+          lineHeight={"110%"}
         >
-          @Dodecahedr0x
-        </a>
-        . Donate to UuGEwN9aeh676ufphbavfssWVxH7BJCqacq1RYhco8e
-      </Tag>
-    </Flex>
+          A new way to explore{" "}
+          <Text as={"span"} color={"blue.400"}>
+            Solsteads
+          </Text>
+        </Heading>
+        <Text color={"gray.500"} maxW={"3xl"}>
+          Owners of Solsteads can claim a <b>$TOWN</b> token daily. This token
+          can then be spent on any stead to increase its visibility. Help your
+          favorite project's stead gain visibility, show some love to a neighbor
+          with a great gallery or just push your stead up the leaderboard!
+        </Text>
+        <Stack spacing={6} direction={"row"}>
+          <Button
+            as={Link}
+            to="leaderboard"
+            rounded={"full"}
+            px={6}
+            colorScheme={"blue"}
+            bg={"blue.400"}
+            _hover={{ bg: "blue.500" }}
+          >
+            Get started
+          </Button>
+        </Stack>
+        <Flex w={"full"} justify="center">
+          {currentImage ? (
+            <Image src={currentImage} maxW="300px" rounded="full" />
+          ) : (
+            <SkeletonCircle size="300px" />
+          )}
+        </Flex>
+        <Flex direction="column">
+          <Heading>How-to use:</Heading>
+          <Stack direction="column" justify="start" align="start">
+            <Text>1. Connect your wallet holding the Solstead in the top right corner.</Text>
+            <Text>2. Go to the <b><Link to="mysteads">My Steads</Link></b> tab.</Text>
+            <Text>3. Create a <b>$TOWN</b> token account by clicking the initialize button</Text>
+            <Text>4. Claim tokens for each of your steads. You can only do this once a day.</Text>
+            <Text>5. Spend your <b>$TOWN</b> tokens any way you'd like!</Text>
+          </Stack>
+        </Flex>
+      </Stack>
+    </Container>
   );
 };
 
