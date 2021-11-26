@@ -1,37 +1,73 @@
 import { CollectionMint } from "contexts/Collection";
 import { useCallback, useMemo, useState } from "react";
 
-import useCollection from "./useCollection"
+import useCollection from "./useCollection";
+import allMetadata from "../assets/all_metadata.json";
 
-export default function usePaginatedCollection() {
-  const { mints: allMints } = useCollection()
+export type SteadFilter = { [traitType: string]: string[] };
 
-  const [currentPage, setCurrentPage] = useState(0)
-  const [pageSize, setPageSize] = useState(50)
-  
+export default function usePaginatedCollection(filters: SteadFilter = {}) {
+  const { mints: allMints } = useCollection();
+
+  const [currentPage, setCurrentPage] = useState(0);
+  const [pageSize, setPageSize] = useState(50);
+
+  const filteredMints = (() => {
+    let filterKeys = Object.keys(filters);
+
+    return allMints.filter((mint) => {
+      let keep = true;
+
+      for (const attribute of (allMetadata as any)[mint.mint.mint.toString()]
+        .attributes) {
+        if (
+          filterKeys.includes(attribute.trait_type) &&
+          !filters[attribute.trait_type].includes(attribute.value)
+        ) {
+          keep = false
+        }
+      }
+
+      return keep
+    });
+  })();
+
   const sortedMints = useMemo(() => {
-    return allMints.sort((a, b) => b.mint.received.toNumber() - a.mint.received.toNumber())
-  }, [allMints])
+    return filteredMints.sort(
+      (a, b) => b.mint.received.toNumber() - a.mint.received.toNumber()
+    );
+  }, [filteredMints]);
 
   const mints: CollectionMint[] = useMemo(() => {
-    return sortedMints.slice(pageSize * currentPage, pageSize * (currentPage + 1))
-  }, [sortedMints, currentPage, pageSize])
+    return sortedMints.slice(
+      pageSize * currentPage,
+      pageSize * (currentPage + 1)
+    );
+  }, [sortedMints, currentPage, pageSize]);
 
   const isLastPage = useMemo(() => {
-    return pageSize * (currentPage + 1) > allMints.length
-  }, [pageSize, currentPage, allMints])
+    return pageSize * (currentPage + 1) > allMints.length;
+  }, [pageSize, currentPage, allMints]);
 
   const nextPage = useCallback(() => {
-    if(!isLastPage) {
-      setCurrentPage(old => old + 1)
+    if (!isLastPage) {
+      setCurrentPage((old) => old + 1);
     }
-  }, [isLastPage])
+  }, [isLastPage]);
 
   const previousPage = useCallback(() => {
-    if(currentPage !== 0) {
-      setCurrentPage(old => old - 1)
+    if (currentPage !== 0) {
+      setCurrentPage((old) => old - 1);
     }
-  }, [currentPage])
+  }, [currentPage]);
 
-  return { mints, pageSize, currentPage, isLastPage, setPageSize, nextPage, previousPage };
+  return {
+    mints,
+    pageSize,
+    currentPage,
+    isLastPage,
+    setPageSize,
+    nextPage,
+    previousPage,
+  };
 }

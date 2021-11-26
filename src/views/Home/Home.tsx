@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useState } from "react";
 import {
   Box,
   Button,
@@ -13,10 +13,19 @@ import {
 
 import useCollection from "../../hooks/useCollection";
 import TokenCard from "../../components/TokenCard";
-import usePaginatedCollection from "hooks/usePaginatedCollection";
+import usePaginatedCollection, {
+  SteadFilter,
+} from "hooks/usePaginatedCollection";
 import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
+import { getAllAttributes } from "utils";
+
+const allAttributes = getAllAttributes();
 
 const Home: React.FC = () => {
+  const [filters, setFilters] = useState<SteadFilter>({});
+  const [, updateState] = React.useState<Object>();
+  const forceUpdate = React.useCallback(() => updateState({}), []);
+
   const { collection } = useCollection();
   const {
     mints,
@@ -26,10 +35,39 @@ const Home: React.FC = () => {
     previousPage,
     nextPage,
     setPageSize,
-  } = usePaginatedCollection();
+  } = usePaginatedCollection(filters);
+
+  const handleSetFilter = useCallback(
+    (attributeType: string, value?: string) => {
+      console.log(attributeType, value);
+      setFilters((old) => {
+        // TODO: allow multiple filters
+        if (!value) delete old[attributeType];
+        else old[attributeType] = [value];
+        return old;
+      });
+      forceUpdate()
+    },
+    [forceUpdate]
+  );
 
   return (
     <Flex direction="column" w="100%" align="center" p="10px">
+      <Wrap direction="row" justify="center" mb="10px">
+        {Object.keys(allAttributes).map((attributeType) => (
+          <Box key={attributeType}>
+            <Text>{attributeType}</Text>
+            <Select
+              onChange={(e) => handleSetFilter(attributeType, e.target.value)}
+            >
+              <option value={undefined}></option>
+              {allAttributes[attributeType].values.map((attribute) => (
+                <option key={attribute} value={attribute}>{attribute}</option>
+              ))}
+            </Select>
+          </Box>
+        ))}
+      </Wrap>
       {collection ? (
         <Box justify="center" align="center" w="full">
           <Wrap
@@ -40,7 +78,10 @@ const Home: React.FC = () => {
             margin="auto"
           >
             {mints.map((item, i) => (
-              <TokenCard key={item.mint.mint.toString() + item.rank} token={item} />
+              <TokenCard
+                key={item.mint.mint.toString() + item.rank}
+                token={item}
+              />
             ))}
           </Wrap>
           <ButtonGroup variant="outline" isAttached spacing="6" m="10px">
@@ -66,7 +107,10 @@ const Home: React.FC = () => {
           </ButtonGroup>
           <Box w="100px">
             <Text>Page Size</Text>
-            <Select onChange={(e) => setPageSize(Number(e.target.value))} value={pageSize}>
+            <Select
+              onChange={(e) => setPageSize(Number(e.target.value))}
+              value={pageSize}
+            >
               <option value="25">25</option>
               <option value="50">50</option>
               <option value="100">100</option>
@@ -81,7 +125,17 @@ const Home: React.FC = () => {
           <Spinner size="xl" thickness={"8px"} />
         </Box>
       )}
-      <Tag my="10px" color="teal">Made with ❤️ by <a href="https://twitter.com/Dodecahedr0x" target="_blank" rel="noreferrer">@Dodecahedr0x</a>. Donate to UuGEwN9aeh676ufphbavfssWVxH7BJCqacq1RYhco8e</Tag>
+      <Tag my="10px" color="teal">
+        Made with ❤️ by{" "}
+        <a
+          href="https://twitter.com/Dodecahedr0x"
+          target="_blank"
+          rel="noreferrer"
+        >
+          @Dodecahedr0x
+        </a>
+        . Donate to UuGEwN9aeh676ufphbavfssWVxH7BJCqacq1RYhco8e
+      </Tag>
     </Flex>
   );
 };

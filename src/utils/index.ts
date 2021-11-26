@@ -2,34 +2,29 @@ import { Account, AnyPublicKey, programs } from "@metaplex/js";
 import * as anchor from "@project-serum/anchor";
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
-  TOKEN_PROGRAM_ID,
-  Token,
+  TOKEN_PROGRAM_ID
 } from "@solana/spl-token";
 
-export const createSplAccount = async (
-  instructions: anchor.web3.TransactionInstruction[],
-  payer: anchor.web3.PublicKey,
-  accountRentExempt: number,
-  mint: anchor.web3.PublicKey,
-  owner: anchor.web3.PublicKey,
-  space: number
-) => {
-  const account = await findTokenAddress(owner, mint);
-  instructions.push(
-    anchor.web3.SystemProgram.createAccount({
-      fromPubkey: payer,
-      newAccountPubkey: account,
-      lamports: accountRentExempt,
-      space,
-      programId: TOKEN_PROGRAM_ID,
-    })
-  );
+import allMetadata from "../assets/all_metadata.json";
 
-  instructions.push(
-    Token.createInitAccountInstruction(TOKEN_PROGRAM_ID, mint, account, owner)
-  );
+export const getAllAttributes = () => {
+  const attributes: {[traitType: string]: {count: number, values: string[]}} = {};
 
-  return account;
+  for (const key of Object.keys(allMetadata)) {
+    const metadata: any = (allMetadata as any)[key];
+
+    for (const attribute of metadata.attributes) {
+      if (!attributes[attribute.trait_type]) {
+        attributes[attribute.trait_type] = { count: 0, values: [] };
+      }
+
+      attributes[attribute.trait_type].count += 1;
+      if (!attributes[attribute.trait_type].values.includes(attribute.value))
+        attributes[attribute.trait_type].values.push(attribute.value);
+    }
+  }
+  
+  return attributes
 };
 
 export const shortAddress = (address: string | undefined): string => {
