@@ -349,13 +349,8 @@ const CollectionProvider: React.FC = ({ children }) => {
         provider
       );
 
-      const index = new anchor.BN(
-        collection.mints
-          .map((item) => item.mint.toString())
-          .indexOf(mint.mint.mint.toString())
-      );
       try {
-        await program.rpc.spend(index, amount, {
+        await program.rpc.spend(mint.mint.index, amount, {
           accounts: {
             collection: SOLSTEADS_COLLECTION,
             targetToken: mint.mint.mint,
