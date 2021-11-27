@@ -16,7 +16,11 @@ import Context from "./Context";
 import ConfirmationModal from "components/ConfirmationModal";
 import { useDisclosure, useToast } from "@chakra-ui/react";
 import { SOLSTEADS_COLLECTION } from "../../constants";
-import { findDataByOwner, findTokenAddress } from "utils";
+import {
+  findAssociatedTokenAddress,
+  findDataByOwner,
+  findTokenAddress,
+} from "utils";
 
 import allMetadata from "../../constants/all_metadata.json";
 
@@ -42,6 +46,9 @@ const CollectionProvider: React.FC = ({ children }) => {
     [connection, wallet]
   );
 
+  /**
+   * Fetches the collection object from the program
+   */
   const fetchCollection = useCallback(async () => {
     if (!wallet) return;
 
@@ -53,7 +60,7 @@ const CollectionProvider: React.FC = ({ children }) => {
       const zeroKey = new anchor.web3.PublicKey(0);
       fetchedCollection.mints = fetchedCollection.mints
         .filter((item: CollectionItem) => !item.mint.equals(zeroKey))
-        .sort((a, b) => b.received.sub(a.received).toNumber());
+        .map((e, i) => ({ ...e, index: new anchor.BN(i) }));
       setCollection(fetchedCollection);
     } catch (err) {
       console.log("Failed fetching collection, retrying in 1 second");
@@ -65,6 +72,9 @@ const CollectionProvider: React.FC = ({ children }) => {
     fetchCollection();
   }, [fetchCollection]);
 
+  /**
+   * Fetches the tokens owned by the user
+   */
   const fetchOwned = useCallback(async () => {
     if (!wallet.publicKey) return;
 
@@ -92,6 +102,7 @@ const CollectionProvider: React.FC = ({ children }) => {
       if (!collection || !connection) return mint;
 
       const i = collection.mints
+        .sort((a, b) => b.received.sub(a.received).toNumber())
         .map((e) => e.mint.toString())
         .indexOf(mint.mint.mint.toString());
 
@@ -142,17 +153,16 @@ const CollectionProvider: React.FC = ({ children }) => {
   const fetchUserAccount = useCallback(async () => {
     if (!collection || !connection || !wallet.publicKey) return;
 
-    const collectionKey = new anchor.web3.PublicKey(collection.token);
     try {
       const associatedAddress = await Token.getAssociatedTokenAddress(
         ASSOCIATED_TOKEN_PROGRAM_ID,
         TOKEN_PROGRAM_ID,
-        collectionKey,
+        collection.token,
         wallet.publicKey
       );
       const token = new Token(
         connection,
-        collectionKey,
+        collection.token,
         TOKEN_PROGRAM_ID,
         wallet as any
       );
@@ -271,48 +281,19 @@ const CollectionProvider: React.FC = ({ children }) => {
         programID,
         provider
       );
+      const associatedAddress = await findAssociatedTokenAddress(
+        wallet.publicKey,
+        mint.mint.mint
+      );
 
-      const index = new anchor.BN(
-        collection.mints
-          .map((item) => item.mint.toString())
-          .indexOf(mint.mint.mint.toString())
-      );
-      const claimedAssociatedAddress = await Token.getAssociatedTokenAddress(
-        ASSOCIATED_TOKEN_PROGRAM_ID,
-        TOKEN_PROGRAM_ID,
-        mint.mint.mint,
-        wallet.publicKey
-      );
-      const tokenClaimed = new Token(
-        connection,
-        mint.mint.mint,
-        TOKEN_PROGRAM_ID,
-        wallet as any
-      );
-      const accountClaimed = await tokenClaimed.getAccountInfo(
-        claimedAssociatedAddress
-      );
-      const associatedAddress = await Token.getAssociatedTokenAddress(
-        ASSOCIATED_TOKEN_PROGRAM_ID,
-        TOKEN_PROGRAM_ID,
-        collection.token,
-        wallet.publicKey
-      );
-      const token = new Token(
-        connection,
-        collection.token,
-        TOKEN_PROGRAM_ID,
-        wallet as any
-      );
-      const account = await token.getAccountInfo(associatedAddress);
       try {
-        await program.rpc.claim(index, {
+        await program.rpc.claim(mint.mint.index, {
           accounts: {
             collection: SOLSTEADS_COLLECTION,
-            claimedToken: tokenClaimed.publicKey,
-            claimedTokenAccount: accountClaimed.address,
+            claimedToken: mint.mint.mint,
+            claimedTokenAccount: associatedAddress,
             owner: wallet.publicKey,
-            tokenAccount: account.address,
+            tokenAccount: userAccount.address,
             mint: collection.token,
             mintAuthority: collection.tokenAuthority,
             tokenProgram: TOKEN_PROGRAM_ID,
@@ -345,7 +326,6 @@ const CollectionProvider: React.FC = ({ children }) => {
       onClose();
     },
     [
-      connection,
       collection,
       provider,
       toast,

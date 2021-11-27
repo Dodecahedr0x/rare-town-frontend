@@ -16,6 +16,7 @@ export interface Collection {
 
 export interface CollectionItem {
   mint: PublicKey;
+  index: anchor.BN;
   received: anchor.BN;
   claimed: anchor.BN;
 }
