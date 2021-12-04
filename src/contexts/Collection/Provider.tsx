@@ -15,14 +15,12 @@ import idl from "../../constants/idls/collection.json";
 import Context from "./Context";
 import ConfirmationModal from "components/ConfirmationModal";
 import { useDisclosure, useToast } from "@chakra-ui/react";
-import { SOLSTEADS_COLLECTION } from "../../constants";
+import constants from "../../constants";
 import {
   findAssociatedTokenAddress,
   findDataByOwner,
   findTokenAddress,
 } from "utils";
-
-import allMetadata from "../../constants/all_metadata.json";
 
 const programID = new PublicKey(idl.metadata.address);
 
@@ -56,7 +54,9 @@ const CollectionProvider: React.FC = ({ children }) => {
 
     try {
       const fetchedCollection: Collection =
-        (await program.account.collection.fetch(SOLSTEADS_COLLECTION)) as any;
+        (await program.account.collection.fetch(
+          constants.solsteadsCollection
+        )) as any;
       const zeroKey = new anchor.web3.PublicKey(0);
       fetchedCollection.mints = fetchedCollection.mints
         .filter((item: CollectionItem) => !item.mint.equals(zeroKey))
@@ -105,7 +105,7 @@ const CollectionProvider: React.FC = ({ children }) => {
         .map((e) => e.mint.toString())
         .indexOf(mint.mint.mint.toString());
 
-      const metadata = (allMetadata as { [key: string]: any })[
+      const metadata = (constants.metadata as { [key: string]: any })[
         mint.mint.mint.toString()
       ];
 
@@ -293,7 +293,7 @@ const CollectionProvider: React.FC = ({ children }) => {
       try {
         await program.rpc.claim(mint.mint.index, {
           accounts: {
-            collection: SOLSTEADS_COLLECTION,
+            collection: constants.solsteadsCollection,
             claimedToken: mint.mint.mint,
             claimedTokenAccount: associatedAddress,
             owner: wallet.publicKey,
@@ -356,7 +356,7 @@ const CollectionProvider: React.FC = ({ children }) => {
       try {
         await program.rpc.spend(mint.mint.index, amount, {
           accounts: {
-            collection: SOLSTEADS_COLLECTION,
+            collection: constants.solsteadsCollection,
             targetToken: mint.mint.mint,
             spender: wallet.publicKey,
             tokenAccount: userAccount.address,

@@ -10,7 +10,7 @@ import {
   SkeletonCircle,
 } from "@chakra-ui/react";
 
-import allMetadata from "../../assets/all_metadata.json";
+import constants from "../../constants";
 import { Link } from "react-router-dom";
 
 const Home: React.FC = () => {
@@ -18,9 +18,9 @@ const Home: React.FC = () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      const keys = Object.keys(allMetadata);
+      const keys = Object.keys(constants.metadata);
       const randomIndex = Math.round(Math.random() * keys.length);
-      const image = (allMetadata as any)[keys[randomIndex]].properties.files[1]
+      const image = (constants.metadata as any)[keys[randomIndex]].properties.files[1]
         .uri;
       setCurrentImage(image);
     }, 500);
