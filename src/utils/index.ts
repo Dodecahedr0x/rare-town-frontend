@@ -5,13 +5,13 @@ import {
   TOKEN_PROGRAM_ID
 } from "@solana/spl-token";
 
-import allMetadata from "../assets/all_metadata.json";
+import constants from "../constants";
 
 export const getAllAttributes = () => {
   const attributes: {[traitType: string]: {count: number, values: string[]}} = {};
 
-  for (const key of Object.keys(allMetadata)) {
-    const metadata: any = (allMetadata as any)[key];
+  for (const key of Object.keys(constants.metadata)) {
+    const metadata: any = (constants.metadata as any)[key];
 
     for (const attribute of metadata.attributes) {
       if (!attributes[attribute.trait_type]) {
