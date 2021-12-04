@@ -23,9 +23,12 @@ import Home from "./views/Home";
 import { CollectionProvider } from "contexts/Collection";
 import MySteads from "views/MySteads";
 import Leaderboard from "views/Leaderboard";
+import Rent from "views/Rent";
+import { SteadRentProvider } from "contexts/SteadRent";
+import constants from "./constants";
 
 const WalletProviders: React.FC = ({ children }) => {
-  const network = WalletAdapterNetwork.Mainnet;
+  const network = constants.network;
   const endpoint = useMemo(() => clusterApiUrl(network), [network]);
   const toast = useToast();
 
@@ -71,7 +74,9 @@ const Providers: React.FC = ({ children }) => {
   return (
     <ChakraProvider>
       <WalletProviders>
-        <CollectionProvider>{children}</CollectionProvider>
+        <CollectionProvider>
+          <SteadRentProvider>{children}</SteadRentProvider>
+        </CollectionProvider>
       </WalletProviders>
     </ChakraProvider>
   );
@@ -86,6 +91,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/mysteads" element={<MySteads />} />
+          <Route path="/rent" element={<Rent />} />
         </Routes>
       </Router>
     </Providers>
