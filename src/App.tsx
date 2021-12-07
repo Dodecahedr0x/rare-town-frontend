@@ -16,7 +16,6 @@ import {
   getSolletWallet,
   getTorusWallet,
 } from "@solana/wallet-adapter-wallets";
-import { clusterApiUrl } from "@solana/web3.js";
 
 import Navbar from "./components/Navbar";
 import Home from "./views/Home";
@@ -26,7 +25,10 @@ import Leaderboard from "views/Leaderboard";
 
 const WalletProviders: React.FC = ({ children }) => {
   const network = WalletAdapterNetwork.Mainnet;
-  const endpoint = useMemo(() => clusterApiUrl(network), [network]);
+  const endpoint =
+    "https://connect.runnode.com/?apikey=" +
+    process.env.REACT_APP_RUN_NODE_API_KEY;
+  console.log(process.env)
   const toast = useToast();
 
   const wallets = useMemo(

@@ -10,6 +10,7 @@ import {
   Text,
   Wrap,
 } from "@chakra-ui/react";
+import { RepeatIcon } from "@chakra-ui/icons";
 
 import useCollection from "../../hooks/useCollection";
 import TokenCard from "../../components/TokenCard";
@@ -26,7 +27,7 @@ const Leaderboard: React.FC = () => {
   const [, updateState] = React.useState<Object>();
   const forceUpdate = React.useCallback(() => updateState({}), []);
 
-  const { collection } = useCollection();
+  const { collection, refresh } = useCollection();
   const {
     mints,
     currentPage,
@@ -45,7 +46,7 @@ const Leaderboard: React.FC = () => {
         else old[attributeType] = [value];
         return old;
       });
-      forceUpdate()
+      forceUpdate();
     },
     [forceUpdate]
   );
@@ -61,12 +62,23 @@ const Leaderboard: React.FC = () => {
             >
               <option value={undefined}></option>
               {allAttributes[attributeType].values.map((attribute) => (
-                <option key={attribute} value={attribute}>{attribute}</option>
+                <option key={attribute} value={attribute}>
+                  {attribute}
+                </option>
               ))}
             </Select>
           </Box>
         ))}
       </Wrap>
+      <Button
+        rightIcon={<RepeatIcon />}
+        colorScheme="teal"
+        variant="outline"
+        mb="2"
+        onClick={refresh}
+      >
+        Refresh
+      </Button>
       {collection ? (
         <Box justify="center" align="center" w="full">
           <Wrap

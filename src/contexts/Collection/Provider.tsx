@@ -63,8 +63,7 @@ const CollectionProvider: React.FC = ({ children }) => {
         .map((e, i) => ({ ...e, index: new anchor.BN(i) }));
       setCollection(fetchedCollection);
     } catch (err) {
-      console.log("Failed fetching collection, retrying in 1 second");
-      setTimeout(() => fetchCollection(), 1000);
+      console.log("Failed fetching collection");
     }
   }, [wallet, provider]);
 
@@ -91,8 +90,8 @@ const CollectionProvider: React.FC = ({ children }) => {
   }, [wallet.publicKey, connection]);
 
   useEffect(() => {
-    if (!isFetchingOwned && ownedTokens.length === 0) fetchOwned();
-  }, [fetchOwned, isFetchingOwned, ownedTokens]);
+    if (ownedTokens.length === 0) fetchOwned();
+  }, [fetchOwned, ownedTokens]);
 
   /**
    * Updates data for a specific token
@@ -122,7 +121,7 @@ const CollectionProvider: React.FC = ({ children }) => {
     [connection, collection, ownedTokens]
   );
 
-  const fetchMints = useCallback(async () => {
+  const fetchMints = useCallback(() => {
     if (!collection || !connection) return;
 
     const ranks = new Array(collection.mints.length)
@@ -175,6 +174,11 @@ const CollectionProvider: React.FC = ({ children }) => {
   useEffect(() => {
     fetchUserAccount();
   }, [fetchUserAccount]);
+
+  const refresh = useCallback(async () => {
+    await fetchCollection()
+    await fetchOwned()
+  }, [fetchCollection, fetchOwned])
 
   const createAssociatedAccount = useCallback(async () => {
     if (!wallet.publicKey || !collection) return;
@@ -407,6 +411,7 @@ const CollectionProvider: React.FC = ({ children }) => {
         collection,
         mints,
         userAccount,
+        refresh,
         createAssociatedAccount,
         createAccount,
         claimToken,

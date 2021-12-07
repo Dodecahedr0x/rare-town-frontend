@@ -5582,7 +5582,7 @@ dotenv-expand@5.1.0:
   resolved "https://registry.yarnpkg.com/dotenv-expand/-/dotenv-expand-5.1.0.tgz#3fbaf020bfd794884072ea26b1e9791d45a629f0"
   integrity sha512-YXQl1DSa4/PQyRfgrv6aoNjhasp/p4qs9FjJ4q4cQk+8m4r6k4ZSiEyytKG8f8W9gi8WsQtIObNmKd+tMzNTmA==
 
-dotenv@10.0.0:
+dotenv@10.0.0, dotenv@^10.0.0:
   version "10.0.0"
   resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-10.0.0.tgz#3d4227b8fb95f81096cdd2b66653fb2c7085ba81"
   integrity sha512-rlBi9d8jpv9Sf1klPjNfFAuWDjKLwTIJJ/VxtoTwIR6hnZxcEOQCZg2oIL3MWBYw5GpUDKOEnND7LXTbIpQ03Q==
@@ -6794,11 +6794,6 @@ globby@^6.1.0:
     object-assign "^4.0.1"
     pify "^2.0.0"
     pinkie-promise "^2.0.0"
-
-goober@^2.0.35:
-  version "2.0.43"
-  resolved "https://registry.yarnpkg.com/goober/-/goober-2.0.43.tgz#89c86a2e1ea993c27b38753afe61777357bd70fa"
-  integrity sha512-xXrS0EyblOQb2Isn9CO9XyG9f0MXThbbj0I66SYr3fyyM80/R6XHqjBxHBkl0KbTSdFgng9lQyP6m0AD90iwdA==
 
 graceful-fs@^4.1.11, graceful-fs@^4.1.15, graceful-fs@^4.1.2, graceful-fs@^4.1.6, graceful-fs@^4.2.0, graceful-fs@^4.2.4:
   version "4.2.8"
@@ -10685,13 +10680,6 @@ react-focus-lock@2.5.2:
     react-clientside-effect "^1.2.5"
     use-callback-ref "^1.2.5"
     use-sidecar "^1.0.5"
-
-react-hot-toast@^2.1.1:
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/react-hot-toast/-/react-hot-toast-2.1.1.tgz#56409ab406b534e9e58274cf98d80355ba0fdda0"
-  integrity sha512-Odrp4wue0fHh0pOfZt5H+9nWCMtqs3wdlFSzZPp7qsxfzmbE26QmGWIh6hG43CukiPeOjA8WQhBJU8JwtWvWbQ==
-  dependencies:
-    goober "^2.0.35"
 
 react-is@^16.7.0, react-is@^16.8.1:
   version "16.13.1"
