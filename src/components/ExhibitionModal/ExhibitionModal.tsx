@@ -79,7 +79,7 @@ const ExhibitionModal: React.FC<ExhibitionModalProps> = ({
 
   useEffect(() => {
     checkOwnedPieces();
-  }, []);
+  }, [checkOwnedPieces]);
 
   const checkExhibitedPieces = useCallback(async () => {
     const [escrow] = await PublicKey.findProgramAddress(
@@ -116,7 +116,7 @@ const ExhibitionModal: React.FC<ExhibitionModalProps> = ({
 
   useEffect(() => {
     checkExhibitedPieces();
-  }, []);
+  }, [checkExhibitedPieces]);
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="full">
