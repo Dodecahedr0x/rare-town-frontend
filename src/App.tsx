@@ -28,7 +28,6 @@ const WalletProviders: React.FC = ({ children }) => {
   const endpoint =
     "https://connect.runnode.com/?apikey=" +
     process.env.REACT_APP_RUN_NODE_API_KEY;
-  console.log(process.env)
   const toast = useToast();
 
   const wallets = useMemo(
