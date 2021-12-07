@@ -468,11 +468,7 @@ const SteadRentProvider: React.FC = ({ children }) => {
       );
 
       const [depositedTokenAccount] = await PublicKey.findProgramAddress(
-        [
-          Buffer.from("token_account"),
-          exhibition.property.toBuffer(),
-          tokenMint.toBuffer(),
-        ],
+        [Buffer.from("token_account"), tokenMint.toBuffer()],
         constants.steadRent
       );
 
@@ -483,6 +479,22 @@ const SteadRentProvider: React.FC = ({ children }) => {
         wallet.publicKey
       );
 
+      let instructions = [];
+      // Create the account if it does not exist
+      try {
+        await connection.getTokenAccountBalance(buyerAccount);
+      } catch (err) {
+        instructions.push(
+          Token.createAssociatedTokenAccountInstruction(
+            ASSOCIATED_TOKEN_PROGRAM_ID,
+            TOKEN_PROGRAM_ID,
+            tokenMint,
+            buyerAccount,
+            wallet.publicKey,
+            wallet.publicKey
+          )
+        );
+      }
       const item = await program.account.exhibitionItem.fetch(exhibitionItem);
 
       try {
@@ -502,6 +514,7 @@ const SteadRentProvider: React.FC = ({ children }) => {
             tokenProgram: TOKEN_PROGRAM_ID,
             systemProgram: SystemProgram.programId,
           },
+          instructions,
         });
 
         toast({
@@ -527,7 +540,7 @@ const SteadRentProvider: React.FC = ({ children }) => {
 
       onClose();
     },
-    [provider, toast, state, wallet, onClose, onOpen, fetchExhibitions]
+    [connection, provider, toast, state, wallet, onClose, onOpen, fetchExhibitions]
   );
 
   const withdrawToken = useCallback(
