@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo } from "react";
 import { Route, HashRouter as Router, Routes } from "react-router-dom";
 import { ChakraProvider, useToast } from "@chakra-ui/react";
-import { WalletAdapterNetwork, WalletError } from "@solana/wallet-adapter-base";
+import { WalletError } from "@solana/wallet-adapter-base";
 import {
   ConnectionProvider,
   WalletProvider,

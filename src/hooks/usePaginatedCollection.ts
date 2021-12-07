@@ -18,7 +18,7 @@ export default function usePaginatedCollection(filters: SteadFilter = {}) {
     return allMints.filter((mint) => {
       let keep = true;
 
-      for (const attribute of (constants.metadata as any)[mint.mint.mint.toString()]
+      for (const attribute of constants.metadata[mint.mint.mint.toString()]
         .attributes) {
         if (
           filterKeys.includes(attribute.trait_type) &&

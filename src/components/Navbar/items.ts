@@ -14,6 +14,10 @@ const NAV_ITEMS: Array<NavItem> = [
     href: "#/mysteads"
   },
   {
+    label: "Rent",
+    href: "#/rent"
+  },
+  {
     label: "Resources",
     children: [
       {
