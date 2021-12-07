@@ -374,7 +374,7 @@ const SteadRentProvider: React.FC = ({ children }) => {
       );
 
       const [exhibitionItem, itemBump] = await PublicKey.findProgramAddress(
-        [Buffer.from("item"), exhibition.toBuffer(), tokenMint.toBuffer()],
+        [Buffer.from("item"), property.toBuffer(), tokenMint.toBuffer()],
         constants.steadRent
       );
 
@@ -489,23 +489,6 @@ const SteadRentProvider: React.FC = ({ children }) => {
 
       const item = await program.account.exhibitionItem.fetch(exhibitionItem);
 
-      console.log(
-        Object.values({
-          state: stateAddress,
-          exhibition: exhibitionAddress,
-          exhibitor: exhibition.exhibitor,
-          exhibitionItem,
-          escrow,
-          mint: tokenMint,
-          depositedTokenAccount,
-          buyer: wallet.publicKey,
-          buyerAccount,
-          renter: exhibition.renter,
-          dao: state.feeEarner,
-          tokenProgram: TOKEN_PROGRAM_ID,
-          systemProgram: SystemProgram.programId,
-        }).map((e) => e.toString())
-      );
       try {
         await program.rpc.buyToken({
           accounts: {
@@ -513,7 +496,7 @@ const SteadRentProvider: React.FC = ({ children }) => {
             exhibition: exhibitionAddress,
             exhibitor: exhibition.exhibitor,
             exhibitionItem: exhibitionItem,
-            escrow: stateAddress,
+            escrow: escrow,
             mint: tokenMint,
             depositedTokenAccount,
             buyer: wallet.publicKey,
