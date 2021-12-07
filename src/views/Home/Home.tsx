@@ -19,8 +19,8 @@ const Home: React.FC = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       const keys = Object.keys(constants.metadata);
-      const randomIndex = Math.round(Math.random() * keys.length);
-      const image = (constants.metadata as any)[keys[randomIndex]].properties.files[1]
+      const randomIndex = Math.floor(Math.random() * keys.length);
+      const image = constants.metadata[keys[randomIndex]].properties.files[1]
         .uri;
       setCurrentImage(image);
     }, 500);

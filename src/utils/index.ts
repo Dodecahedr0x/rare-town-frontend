@@ -11,7 +11,7 @@ export const getAllAttributes = () => {
   const attributes: {[traitType: string]: {count: number, values: string[]}} = {};
 
   for (const key of Object.keys(constants.metadata)) {
-    const metadata: any = (constants.metadata as any)[key];
+    const metadata: any = constants.metadata[key];
 
     for (const attribute of metadata.attributes) {
       if (!attributes[attribute.trait_type]) {

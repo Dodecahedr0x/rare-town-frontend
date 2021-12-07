@@ -1,5 +1,5 @@
 {
-  "8tpv9Myr3A2Ui7jpNDBQNz1wSo3hZ4EVFf1xjGWzbx5R": {
+  "FCUFZpps7B1tQV5xCZcxBAUmajTYqS7Mzf7w3eYjfwb5": {
     "name": "354 Delray Circle",
     "symbol": "SOLSTEAD",
     "description": "A Solstead: Your very own piece of surreal estate.",
@@ -81,7 +81,7 @@
       ]
     }
   },
-  "6ZzCTLXV7LKjQP33jh4jXeqLC7Fg1aCyfddmSsnnhsUn": {
+  "9ceFf3mZXDSLkGuHbSzCoDE9cLNRZaQxXMdDmSPKGAMa": {
     "name": "247 Privet Drive",
     "symbol": "SOLSTEAD",
     "description": "A Solstead: Your very own piece of surreal estate.",
@@ -155,7 +155,7 @@
       ]
     }
   },
-  "ApV6YYRhR4MKhuRFDJeExBmVnNYzNpPHFjYp6Bpzijib": {
+  "HrYkmo8XBQDgUkfbmigsDRPSriZMZzdndsySWMVjDGMF": {
     "name": "617 Cluster Lane",
     "symbol": "SOLSTEAD",
     "description": "A Solstead: Your very own piece of surreal estate.",
@@ -217,6 +217,92 @@
         },
         {
           "uri": "https://cdn.solsteads.com/addresses/617-cluster-lane.png",
+          "type": "image/png",
+          "cdn": true
+        }
+      ],
+      "creators": [
+        {
+          "address": "85fDijuXEzUW4zjGwgC3kVNdkbZ3D6RHZFFJZndFUEBa",
+          "share": 42
+        },
+        {
+          "address": "ASBsEqEw5bWD2rpiq4JgF8pBjBDVFMDFS5eXXyVf3gDF",
+          "share": 52
+        },
+        {
+          "address": "CL4SAG1ZTVPUVHVf9cLk2nghwQs235NrY4TQXvSKndhi",
+          "share": 6
+        }
+      ]
+    }
+  },
+  "HKgXLNgw9UWkP9ZcMAhMM7KSJUSca65ZAvSvGEiiPmVk": {
+    "name": "237 Baker Street",
+    "symbol": "SOLSTEAD",
+    "description": "A Solstead: Your very own piece of surreal estate.",
+    "seller_fee_basis_points": 500,
+    "image": "1604.png",
+    "external_url": "https://solsteads.com/237-baker-street",
+    "attributes": [
+      {
+        "trait_type": "Biome",
+        "value": "Mountain"
+      },
+      {
+        "trait_type": "Sky",
+        "value": "Day"
+      },
+      {
+        "trait_type": "House style",
+        "value": "Art Deco"
+      },
+      {
+        "trait_type": "House color",
+        "value": "Blue"
+      },
+      {
+        "trait_type": "Openings style",
+        "value": "Rounded"
+      },
+      {
+        "trait_type": "Openings color",
+        "value": "Pale green"
+      },
+      {
+        "trait_type": "Roof style",
+        "value": "Tin"
+      },
+      {
+        "trait_type": "Roof color",
+        "value": "Blue"
+      },
+      {
+        "trait_type": "Material",
+        "value": "Vines"
+      },
+      {
+        "trait_type": "Street name",
+        "value": "Baker Street"
+      },
+      {
+        "trait_type": "House number",
+        "value": 237
+      }
+    ],
+    "collection": {
+      "name": "Solsteads",
+      "family": "Solsteads"
+    },
+    "properties": {
+      "category": "image",
+      "files": [
+        {
+          "uri": "1604.png",
+          "type": "image/png"
+        },
+        {
+          "uri": "https://cdn.solsteads.com/addresses/237-baker-street.png",
           "type": "image/png",
           "cdn": true
         }

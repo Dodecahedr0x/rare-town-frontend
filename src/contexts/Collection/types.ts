@@ -1,6 +1,7 @@
 import { PublicKey } from "@solana/web3.js";
 import * as anchor from "@project-serum/anchor";
 import { AccountInfo as TokenAccount } from "@solana/spl-token";
+import { StaticMetadata } from "../../constants";
 
 interface Bumps {}
 
@@ -26,7 +27,7 @@ export interface CollectionMint {
   rank: number;
   imageUri?: string;
   solsteadsUrl?: string;
-  metadata?: { name: string };
+  metadata?: StaticMetadata;
   owned: boolean;
 }
 

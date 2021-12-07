@@ -39,7 +39,7 @@ const CollectionProvider: React.FC = ({ children }) => {
   const provider = useMemo(
     () =>
       new anchor.Provider(connection, wallet as any, {
-        preflightCommitment: "processed",
+        preflightCommitment: "confirmed",
       }),
     [connection, wallet]
   );
@@ -105,9 +105,7 @@ const CollectionProvider: React.FC = ({ children }) => {
         .map((e) => e.mint.toString())
         .indexOf(mint.mint.mint.toString());
 
-      const metadata = (constants.metadata as { [key: string]: any })[
-        mint.mint.mint.toString()
-      ];
+      const metadata = constants.metadata[mint.mint.mint.toString()];
 
       return {
         mint: mint.mint,
@@ -259,6 +257,7 @@ const CollectionProvider: React.FC = ({ children }) => {
         duration: 5000,
         isClosable: true,
       });
+      fetchUserAccount();
     } catch (err) {
       console.log(err);
 
@@ -272,7 +271,15 @@ const CollectionProvider: React.FC = ({ children }) => {
     } finally {
       onClose();
     }
-  }, [collection, connection, toast, wallet, onClose, onOpen]);
+  }, [
+    collection,
+    connection,
+    toast,
+    wallet,
+    onClose,
+    onOpen,
+    fetchUserAccount,
+  ]);
 
   const claimToken = useCallback(
     async (mint: CollectionMint) => {
