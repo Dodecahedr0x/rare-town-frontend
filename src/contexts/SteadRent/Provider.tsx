@@ -113,12 +113,8 @@ const SteadRentProvider: React.FC = ({ children }) => {
         constants.steadRent,
         provider
       );
-      const [exhibitionAddress] = await PublicKey.findProgramAddress(
-        [Buffer.from("exhibition"), exhibition.property.toBuffer()],
-        constants.steadRent
-      );
       const [exhibitionItem] = await PublicKey.findProgramAddress(
-        [Buffer.from("item"), exhibitionAddress.toBuffer(), mint.toBuffer()],
+        [Buffer.from("item"), exhibition.property.toBuffer(), mint.toBuffer()],
         constants.steadRent
       );
       return await program.account.exhibitionItem.fetch(exhibitionItem);
