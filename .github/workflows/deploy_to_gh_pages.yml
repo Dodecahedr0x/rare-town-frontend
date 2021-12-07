@@ -11,17 +11,12 @@ jobs:
         uses: actions/checkout@v2
         with:
           persist-credentials: false
-        
-      - name: Store variables
-        run: |
-          echo "REACT_APP_RUN_NODE_API_KEY=${{ secrets.REACT_APP_RUN_NODE_API_KEY }}" >> $GITHUB_ENV
-
       - name: Install and Build 🔧
         run: |
           yarn install
           yarn build
         env:
-          REACT_APP_RUN_NODE_API_KEY: ${{ env.REACT_APP_RUN_NODE_API_KEY }}
+          REACT_APP_RUN_NODE_API_KEY: ${{ secrets.REACT_APP_RUN_NODE_API_KEY }}
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@releases/v3
         with:
