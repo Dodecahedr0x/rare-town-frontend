@@ -4,7 +4,7 @@ import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
 import mainnetMetadata from "./all_metadata.json";
 import devnetMetadata from "./devnet_metadata.json";
 
-const MAINNET = false;
+const MAINNET = true;
 
 export type StaticMetadata = {
   name: string;
@@ -37,6 +37,7 @@ export type StaticMetadata = {
 export const COLLECTION_CLAIM_DELAY = new anchor.BN(86400);
 
 const devnetConstants = {
+  mainnet: MAINNET,
   network: WalletAdapterNetwork.Devnet,
   wrappedSol: new anchor.web3.PublicKey(
     "So11111111111111111111111111111111111111112"
@@ -54,6 +55,7 @@ const devnetConstants = {
 };
 
 const mainnetConstants = {
+  mainnet: MAINNET,
   network: WalletAdapterNetwork.Mainnet,
   wrappedSol: new anchor.web3.PublicKey(
     "So11111111111111111111111111111111111111112"

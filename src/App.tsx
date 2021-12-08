@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo } from "react";
 import { Route, HashRouter as Router, Routes } from "react-router-dom";
 import { ChakraProvider, useToast } from "@chakra-ui/react";
-import { WalletError } from "@solana/wallet-adapter-base";
+import { WalletAdapterNetwork, WalletError } from "@solana/wallet-adapter-base";
 import {
   ConnectionProvider,
   WalletProvider,
@@ -25,12 +25,18 @@ import Leaderboard from "views/Leaderboard";
 import Rent from "views/Rent";
 import { SteadRentProvider } from "contexts/SteadRent";
 import constants from "./constants";
+import { clusterApiUrl } from "@solana/web3.js";
 
 const WalletProviders: React.FC = ({ children }) => {
-  const network = WalletAdapterNetwork.Mainnet;
-  const endpoint =
-    "https://connect.runnode.com/?apikey=" +
-    process.env.REACT_APP_RUN_NODE_API_KEY;
+  const network = constants.mainnet
+    ? WalletAdapterNetwork.Mainnet
+    : WalletAdapterNetwork.Devnet;
+
+  const devnetEnpoint = useMemo(() => clusterApiUrl(network), [network]);
+  const endpoint = constants.mainnet
+    ? "https://connect.runnode.com/?apikey=" +
+      process.env.REACT_APP_RUN_NODE_API_KEY
+    : devnetEnpoint;
   const toast = useToast();
 
   const wallets = useMemo(
