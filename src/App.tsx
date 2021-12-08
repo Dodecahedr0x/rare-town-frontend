@@ -69,7 +69,10 @@ const WalletProviders: React.FC = ({ children }) => {
   );
 
   return (
-    <ConnectionProvider endpoint={endpoint}>
+    <ConnectionProvider
+      endpoint={endpoint}
+      config={{ confirmTransactionInitialTimeout: 60000 }}
+    >
       <WalletProvider wallets={wallets} onError={onError}>
         <WalletModalProvider>{children}</WalletModalProvider>
       </WalletProvider>

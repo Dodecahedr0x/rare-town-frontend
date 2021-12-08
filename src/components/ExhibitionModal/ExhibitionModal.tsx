@@ -75,7 +75,7 @@ const ExhibitionModal: React.FC<ExhibitionModalProps> = ({
     } catch (err) {
       console.log("Failed fetching owned tokens", err);
     }
-  }, [connection, exhibition, wallet]);
+  }, [connection, exhibition, wallet, setOwnedTokens]);
 
   useEffect(() => {
     checkOwnedPieces();
