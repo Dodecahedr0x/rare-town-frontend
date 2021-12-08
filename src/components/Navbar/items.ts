@@ -27,6 +27,12 @@ const NAV_ITEMS: Array<NavItem> = [
         newTab: true,
       },
       {
+        label: "Stead renting Programs On GitHub",
+        subLabel: "Solana program repo",
+        href: "https://github.com/Dodecahedr0x/stead-rent",
+        newTab: true,
+      },
+      {
         label: "RareTown Front-End On GitHub",
         subLabel: "Front-end repo",
         href: "https://github.com/Dodecahedr0x/rare-town-frontend",
