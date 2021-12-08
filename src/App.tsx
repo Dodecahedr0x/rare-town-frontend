@@ -22,12 +22,21 @@ import Home from "./views/Home";
 import { CollectionProvider } from "contexts/Collection";
 import MySteads from "views/MySteads";
 import Leaderboard from "views/Leaderboard";
+import Rent from "views/Rent";
+import { SteadRentProvider } from "contexts/SteadRent";
+import constants from "./constants";
+import { clusterApiUrl } from "@solana/web3.js";
 
 const WalletProviders: React.FC = ({ children }) => {
-  const network = WalletAdapterNetwork.Mainnet;
-  const endpoint =
-    "https://connect.runnode.com/?apikey=" +
-    process.env.REACT_APP_RUN_NODE_API_KEY;
+  const network = constants.mainnet
+    ? WalletAdapterNetwork.Mainnet
+    : WalletAdapterNetwork.Devnet;
+
+  const devnetEnpoint = useMemo(() => clusterApiUrl(network), [network]);
+  const endpoint = constants.mainnet
+    ? "https://connect.runnode.com/?apikey=" +
+      process.env.REACT_APP_RUN_NODE_API_KEY
+    : devnetEnpoint;
   const toast = useToast();
 
   const wallets = useMemo(
@@ -60,7 +69,10 @@ const WalletProviders: React.FC = ({ children }) => {
   );
 
   return (
-    <ConnectionProvider endpoint={endpoint}>
+    <ConnectionProvider
+      endpoint={endpoint}
+      config={{ confirmTransactionInitialTimeout: 60000 }}
+    >
       <WalletProvider wallets={wallets} onError={onError}>
         <WalletModalProvider>{children}</WalletModalProvider>
       </WalletProvider>
@@ -72,7 +84,9 @@ const Providers: React.FC = ({ children }) => {
   return (
     <ChakraProvider>
       <WalletProviders>
-        <CollectionProvider>{children}</CollectionProvider>
+        <CollectionProvider>
+          <SteadRentProvider>{children}</SteadRentProvider>
+        </CollectionProvider>
       </WalletProviders>
     </ChakraProvider>
   );
@@ -87,6 +101,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/mysteads" element={<MySteads />} />
+          <Route path="/rent" element={<Rent />} />
         </Routes>
       </Router>
     </Providers>

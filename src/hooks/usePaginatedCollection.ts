@@ -2,7 +2,7 @@ import { CollectionMint } from "contexts/Collection";
 import { useCallback, useMemo, useState } from "react";
 
 import useCollection from "./useCollection";
-import allMetadata from "../assets/all_metadata.json";
+import constants from "../constants";
 
 export type SteadFilter = { [traitType: string]: string[] };
 
@@ -18,7 +18,7 @@ export default function usePaginatedCollection(filters: SteadFilter = {}) {
     return allMints.filter((mint) => {
       let keep = true;
 
-      for (const attribute of (allMetadata as any)[mint.mint.mint.toString()]
+      for (const attribute of constants.metadata[mint.mint.mint.toString()]
         .attributes) {
         if (
           filterKeys.includes(attribute.trait_type) &&

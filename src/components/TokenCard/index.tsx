@@ -10,12 +10,16 @@ import {
   Image,
   Text,
   Spacer,
+  useDisclosure,
 } from "@chakra-ui/react";
 import useCollection from "hooks/useCollection";
+import useSteadRent from "hooks/useSteadRent";
 import { CollectionMint } from "contexts/Collection";
 import { useWallet } from "@solana/wallet-adapter-react";
 import * as anchor from "@project-serum/anchor";
 import { COLLECTION_CLAIM_DELAY } from "../../constants";
+import ExhibitionModal from "components/ExhibitionModal";
+import { ExhibitionStatus } from "contexts/SteadRent";
 
 interface TokenCardProps {
   token: CollectionMint;
@@ -23,11 +27,25 @@ interface TokenCardProps {
 
 const TokenCard: React.FC<TokenCardProps> = ({ token }) => {
   const wallet = useWallet();
-  const { userAccount, claimToken, spendTokens, createAssociatedAccount, fetchMint } =
-    useCollection();
+  const {
+    userAccount,
+    claimToken,
+    spendTokens,
+    createAssociatedAccount,
+    fetchMint,
+  } = useCollection();
+  const { exhibitions } = useSteadRent();
 
   const [amount, setAmount] = useState(0);
   const [timeLeft, setTimeLeft] = useState("");
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
+  const exhibition = useMemo(() => {
+    const candidates = exhibitions.filter((e) =>
+      e.property.equals(token.mint.mint)
+    );
+    if (candidates.length > 0) return candidates[0];
+  }, [exhibitions, token]);
 
   const timeBeforeClaim = useCallback(() => {
     const difference =
@@ -94,6 +112,19 @@ const TokenCard: React.FC<TokenCardProps> = ({ token }) => {
             Check on Solsteads
           </Link>
         </Box>
+        {exhibition && exhibition.status === ExhibitionStatus.Active && (
+          <>
+            <Button isFullWidth colorScheme="teal" onClick={onOpen}>
+              Ckeck exhibition
+            </Button>
+            <ExhibitionModal
+              exhibition={exhibition}
+              property={augmentedToken}
+              isOpen={isOpen}
+              onClose={onClose}
+            />
+          </>
+        )}
         {wallet.connected && (
           <>
             {userAccount ? (
@@ -138,7 +169,11 @@ const TokenCard: React.FC<TokenCardProps> = ({ token }) => {
               </>
             ) : (
               <Flex>
-                <Button colorScheme="teal" onClick={createAssociatedAccount} isFullWidth>
+                <Button
+                  colorScheme="teal"
+                  onClick={createAssociatedAccount}
+                  isFullWidth
+                >
                   Initialize
                 </Button>
               </Flex>
