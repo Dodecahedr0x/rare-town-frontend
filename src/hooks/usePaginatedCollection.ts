@@ -15,21 +15,23 @@ export default function usePaginatedCollection(filters: SteadFilter = {}) {
   const filteredMints = (() => {
     let filterKeys = Object.keys(filters);
 
-    return allMints.filter((mint) => {
-      let keep = true;
+    return filterKeys.length === 0
+      ? allMints
+      : allMints.filter((mint) => {
+          let matches = 0;
 
-      for (const attribute of constants.metadata[mint.mint.mint.toString()]
-        .attributes) {
-        if (
-          filterKeys.includes(attribute.trait_type) &&
-          !filters[attribute.trait_type].includes(attribute.value)
-        ) {
-          keep = false
-        }
-      }
+          for (const attribute of constants.metadata[mint.mint.mint.toString()]
+            .attributes) {
+            if (
+              filterKeys.includes(attribute.trait_type) &&
+              filters[attribute.trait_type].includes(attribute.value)
+            ) {
+              matches += 1;
+            }
+          }
 
-      return keep
-    });
+          return matches === filterKeys.length;
+        });
   })();
 
   const sortedMints = useMemo(() => {
