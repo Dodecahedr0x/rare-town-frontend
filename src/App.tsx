@@ -2,20 +2,9 @@ import React, { useCallback, useMemo } from "react";
 import { Route, HashRouter as Router, Routes } from "react-router-dom";
 import { ChakraProvider, useToast } from "@chakra-ui/react";
 import { WalletAdapterNetwork, WalletError } from "@solana/wallet-adapter-base";
-import {
-  ConnectionProvider,
-  WalletProvider,
-} from "@solana/wallet-adapter-react";
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
-import {
-  getLedgerWallet,
-  getPhantomWallet,
-  getSlopeWallet,
-  getSolflareWallet,
-  getSolletExtensionWallet,
-  getSolletWallet,
-  getTorusWallet,
-} from "@solana/wallet-adapter-wallets";
+import { WalletKitProvider } from "@gokiprotocol/walletkit";
+import { ModalStep } from "@gokiprotocol/walletkit/dist/cjs/components/WalletSelectorModal";
 
 import Navbar from "./components/Navbar";
 import Home from "./views/Home";
@@ -39,21 +28,6 @@ const WalletProviders: React.FC = ({ children }) => {
     : devnetEnpoint;
   const toast = useToast();
 
-  const wallets = useMemo(
-    () => [
-      getPhantomWallet(),
-      getSlopeWallet(),
-      getSolflareWallet(),
-      getTorusWallet({
-        options: { clientId: "Get a client ID @ https://developer.tor.us" },
-      }),
-      getLedgerWallet(),
-      getSolletWallet({ network }),
-      getSolletExtensionWallet({ network }),
-    ],
-    [network]
-  );
-
   const onError = useCallback(
     (error: WalletError) =>
       toast({
@@ -69,14 +43,20 @@ const WalletProviders: React.FC = ({ children }) => {
   );
 
   return (
-    <ConnectionProvider
-      endpoint={endpoint}
-      config={{ confirmTransactionInitialTimeout: 60000 }}
+    <WalletKitProvider
+      app={{
+        name: "The Jungle",
+      }}
+      initialStep={ModalStep.Select}
+      defaultNetwork={network}
+      networkConfigs={{
+        devnet: { name: "RunNode", endpoint: endpoint },
+      }}
+      commitment="confirmed"
+      onError={(e) => onError(new WalletError(e.message, e))}
     >
-      <WalletProvider wallets={wallets} onError={onError}>
-        <WalletModalProvider>{children}</WalletModalProvider>
-      </WalletProvider>
-    </ConnectionProvider>
+      <WalletModalProvider>{children}</WalletModalProvider>
+    </WalletKitProvider>
   );
 };
 

@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useState, useMemo } from "react";
-import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey, SystemProgram, SYSVAR_RENT_PUBKEY } from "@solana/web3.js";
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
@@ -15,24 +14,24 @@ import Context from "./Context";
 import ConfirmationModal from "components/ConfirmationModal";
 import { shortAddress } from "../../utils";
 import constants from "../../constants";
+import { useConnectedWallet, useSolana } from "@saberhq/use-solana";
 
 const SteadRentProvider: React.FC = ({ children }) => {
   const toast = useToast();
-  const { connection } = useConnection();
-  const wallet = useWallet();
+  const { connection } = useSolana();
+  const wallet = useConnectedWallet();
 
   const { isOpen: confirming, onOpen, onClose } = useDisclosure();
   const [isFetching] = useState<boolean>(false);
   const [state, setState] = useState<State>();
   const [exhibitions, setExhibitions] = useState<Exhibition[]>([]);
 
-  const provider = useMemo(
-    () =>
-      new anchor.Provider(connection, wallet as any, {
-        preflightCommitment: "confirmed",
-      }),
-    [connection, wallet]
-  );
+  const provider = useMemo(() => {
+    if (!wallet) return;
+    return new anchor.Provider(connection, wallet, {
+      preflightCommitment: "confirmed",
+    });
+  }, [connection, wallet]);
 
   /**
    * Fetches the state of the program
@@ -66,6 +65,8 @@ const SteadRentProvider: React.FC = ({ children }) => {
    * Fetches all exhibitions
    */
   const fetchExhibitions = useCallback(async () => {
+    if (!provider) return;
+
     const program = new anchor.Program<SteadRent>(
       IDL,
       constants.steadRent,
@@ -124,7 +125,7 @@ const SteadRentProvider: React.FC = ({ children }) => {
 
   const startExhibition = useCallback(
     async (property: PublicKey, exhibitor: PublicKey, renterFee: number) => {
-      if (!wallet.publicKey) return;
+      if (!wallet || !provider) return;
 
       onOpen();
 
@@ -213,7 +214,7 @@ const SteadRentProvider: React.FC = ({ children }) => {
 
   const cancelExhibition = useCallback(
     async (property: PublicKey) => {
-      if (!wallet.publicKey) return;
+      if (!wallet || !provider) return;
 
       onOpen();
 
@@ -296,7 +297,7 @@ const SteadRentProvider: React.FC = ({ children }) => {
 
   const closeExhibition = useCallback(
     async (property: PublicKey) => {
-      if (!wallet.publicKey) return;
+      if (!wallet || !provider) return;
 
       onOpen();
 
@@ -349,7 +350,7 @@ const SteadRentProvider: React.FC = ({ children }) => {
 
   const depositToken = useCallback(
     async (property: PublicKey, tokenMint: PublicKey, price: anchor.BN) => {
-      if (!wallet.publicKey) return;
+      if (!wallet || !provider) return;
 
       onOpen();
 
@@ -436,7 +437,7 @@ const SteadRentProvider: React.FC = ({ children }) => {
 
   const buyToken = useCallback(
     async (exhibition: Exhibition, tokenMint: PublicKey) => {
-      if (!wallet.publicKey || !state) return;
+      if (!wallet || !state || !provider) return;
 
       onOpen();
 
@@ -540,12 +541,21 @@ const SteadRentProvider: React.FC = ({ children }) => {
 
       onClose();
     },
-    [connection, provider, toast, state, wallet, onClose, onOpen, fetchExhibitions]
+    [
+      connection,
+      provider,
+      toast,
+      state,
+      wallet,
+      onClose,
+      onOpen,
+      fetchExhibitions,
+    ]
   );
 
   const withdrawToken = useCallback(
     async (exhibition: Exhibition, tokenMint: PublicKey) => {
-      if (!wallet.publicKey) return;
+      if (!wallet || !provider) return;
 
       onOpen();
 

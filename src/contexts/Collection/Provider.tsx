@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState, useMemo } from "react";
-import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { PublicKey, SystemProgram } from "@solana/web3.js";
+import { PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import {
   AccountInfo as TokenAccount,
   ASSOCIATED_TOKEN_PROGRAM_ID,
@@ -8,26 +7,26 @@ import {
   Token,
 } from "@solana/spl-token";
 import * as anchor from "@project-serum/anchor";
+import { Metadata } from "@metaplex-foundation/mpl-token-metadata";
+import { useDisclosure, useToast } from "@chakra-ui/react";
 
 import { Collection, CollectionItem, CollectionMint } from ".";
 import idl from "../../constants/idls/collection.json";
-
 import Context from "./Context";
 import ConfirmationModal from "components/ConfirmationModal";
-import { useDisclosure, useToast } from "@chakra-ui/react";
 import constants from "../../constants";
 import {
   findAssociatedTokenAddress,
-  findDataByOwner,
   findTokenAddress,
 } from "utils";
+import { useConnectedWallet, useSolana } from "@saberhq/use-solana";
 
 const programID = new PublicKey(idl.metadata.address);
 
 const CollectionProvider: React.FC = ({ children }) => {
   const toast = useToast();
-  const { connection } = useConnection();
-  const wallet = useWallet();
+  const { connection } = useSolana();
+  const wallet = useConnectedWallet();
 
   const { isOpen: confirming, onOpen, onClose } = useDisclosure();
   const [ownedTokens, setOwnedTokens] = useState<string[]>([]);
@@ -36,19 +35,18 @@ const CollectionProvider: React.FC = ({ children }) => {
   const [collection, setCollection] = useState<Collection>();
   const [mints, setMints] = useState<CollectionMint[]>([]);
 
-  const provider = useMemo(
-    () =>
-      new anchor.Provider(connection, wallet as any, {
-        preflightCommitment: "confirmed",
-      }),
-    [connection, wallet]
-  );
+  const provider = useMemo(() => {
+    if (!wallet) return;
+    return new anchor.Provider(connection, wallet, {
+      preflightCommitment: "confirmed",
+    });
+  }, [connection, wallet]);
 
   /**
    * Fetches the collection object from the program
    */
   const fetchCollection = useCallback(async () => {
-    if (!wallet) return;
+    if (!wallet || !provider) return;
 
     const program = new anchor.Program(idl as anchor.Idl, programID, provider);
 
@@ -75,19 +73,19 @@ const CollectionProvider: React.FC = ({ children }) => {
    * Fetches the tokens owned by the user
    */
   const fetchOwned = useCallback(async () => {
-    if (!wallet.publicKey) return;
+    if (!wallet || !provider) return;
 
     setIsFetchingOwned(true);
 
     try {
-      const owned = await findDataByOwner(connection, wallet.publicKey);
+      const owned = await Metadata.findDataByOwner(provider.connection, wallet.publicKey);
       setOwnedTokens(owned.map((e) => e.mint.toString()));
     } catch (err) {
       console.log("Failed fetching owned tokens", err);
     }
 
     setIsFetchingOwned(false);
-  }, [wallet.publicKey, connection]);
+  }, [wallet, provider]);
 
   useEffect(() => {
     if (ownedTokens.length === 0) fetchOwned();
@@ -148,7 +146,7 @@ const CollectionProvider: React.FC = ({ children }) => {
   }, [fetchMints]);
 
   const fetchUserAccount = useCallback(async () => {
-    if (!collection || !connection || !wallet.publicKey) return;
+    if (!collection || !connection || !wallet) return;
 
     try {
       const associatedAddress = await Token.getAssociatedTokenAddress(
@@ -174,12 +172,12 @@ const CollectionProvider: React.FC = ({ children }) => {
   }, [fetchUserAccount]);
 
   const refresh = useCallback(async () => {
-    await fetchCollection()
-    await fetchOwned()
-  }, [fetchCollection, fetchOwned])
+    await fetchCollection();
+    await fetchOwned();
+  }, [fetchCollection, fetchOwned]);
 
   const createAssociatedAccount = useCallback(async () => {
-    if (!wallet.publicKey || !collection) return;
+    if (!wallet || !collection) return;
 
     onOpen();
 
@@ -192,8 +190,11 @@ const CollectionProvider: React.FC = ({ children }) => {
     );
 
     try {
-      await wallet.sendTransaction(
-        new anchor.web3.Transaction().add(
+      const signed = await wallet.signTransaction(
+        new Transaction({
+          recentBlockhash: (await connection.getRecentBlockhash()).blockhash,
+          feePayer: wallet.publicKey,
+        }).add(
           Token.createAssociatedTokenAccountInstruction(
             ASSOCIATED_TOKEN_PROGRAM_ID,
             TOKEN_PROGRAM_ID,
@@ -202,8 +203,11 @@ const CollectionProvider: React.FC = ({ children }) => {
             wallet.publicKey,
             wallet.publicKey
           )
-        ),
-        connection
+        )
+      );
+      await anchor.web3.sendAndConfirmRawTransaction(
+        connection,
+        signed.serialize()
       );
 
       toast({
@@ -228,7 +232,7 @@ const CollectionProvider: React.FC = ({ children }) => {
   }, [collection, connection, toast, wallet, onClose, onOpen]);
 
   const createAccount = useCallback(async () => {
-    if (!wallet.publicKey || !wallet.signTransaction || !collection) return;
+    if (!wallet || !wallet.signTransaction || !collection) return;
 
     onOpen();
 
@@ -239,16 +243,22 @@ const CollectionProvider: React.FC = ({ children }) => {
     );
 
     try {
-      await wallet.sendTransaction(
-        new anchor.web3.Transaction().add(
+      const signed = await wallet.signTransaction(
+        new Transaction({
+          recentBlockhash: (await connection.getRecentBlockhash()).blockhash,
+          feePayer: wallet.publicKey,
+        }).add(
           Token.createInitAccountInstruction(
             TOKEN_PROGRAM_ID,
             collectionKey,
             tokenAccountAddress,
             wallet.publicKey
           )
-        ),
-        connection
+        )
+      );
+      await anchor.web3.sendAndConfirmRawTransaction(
+        connection,
+        signed.serialize()
       );
       toast({
         title: "Account creation successful",
@@ -283,7 +293,7 @@ const CollectionProvider: React.FC = ({ children }) => {
 
   const claimToken = useCallback(
     async (mint: CollectionMint) => {
-      if (!wallet || !collection || !userAccount || !wallet.publicKey) return;
+      if (!wallet || !collection || !userAccount || !provider) return;
 
       onOpen();
 
@@ -350,7 +360,7 @@ const CollectionProvider: React.FC = ({ children }) => {
 
   const spendTokens = useCallback(
     async (mint: CollectionMint, amount: anchor.BN) => {
-      if (!wallet || !collection || !userAccount || !wallet.publicKey) return;
+      if (!wallet || !collection || !userAccount || !provider) return;
 
       onOpen();
 

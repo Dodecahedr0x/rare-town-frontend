@@ -9,7 +9,7 @@ import {
   ModalCloseButton,
   Spinner,
 } from "@chakra-ui/react";
-import { useWallet } from "@solana/wallet-adapter-react";
+import { useSolana } from "@saberhq/use-solana";
 
 interface ConfirmationModalProps {
   isOpen: boolean;
@@ -20,7 +20,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   isOpen,
   onClose
 }) => {
-  const wallet = useWallet();
+  const { walletProviderInfo } = useSolana()
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
@@ -30,7 +30,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
         <ModalCloseButton />
         <ModalBody>
           <VStack spacing="8px" my={2}>
-            <Image src={wallet.wallet?.icon} w="100%" h="100%" />
+            <Image src={walletProviderInfo?.icon.toString()} w="100%" h="100%" />
             <Spinner size="xl" thickness={"8px"} />
           </VStack>
         </ModalBody>

@@ -13,7 +13,7 @@ import { web3 } from "@project-serum/anchor";
 
 import useSteadRent from "../../hooks/useSteadRent";
 import { AugmentedExhibitionItem } from "./ExhibitionModal";
-import { useWallet } from "@solana/wallet-adapter-react";
+import { useConnectedWallet } from "@saberhq/use-solana";
 
 interface DepositTokenCardProps {
   exhibition: Exhibition;
@@ -24,7 +24,7 @@ const ExhibitedTokenCard: React.FC<DepositTokenCardProps> = ({
   exhibition,
   metadata,
 }) => {
-  const wallet = useWallet();
+  const wallet = useConnectedWallet();
   const { state, buyToken, withdrawToken } = useSteadRent();
 
   const handleBuy = useCallback(() => {
@@ -58,7 +58,7 @@ const ExhibitedTokenCard: React.FC<DepositTokenCardProps> = ({
           <Button
             isFullWidth
             colorScheme="green"
-            disabled={!wallet.publicKey || !metadata.item}
+            disabled={!wallet || !metadata.item}
             onClick={handleBuy}
           >
             Buy for{" "}
@@ -67,7 +67,7 @@ const ExhibitedTokenCard: React.FC<DepositTokenCardProps> = ({
               : "???"}{" "}
             SOL
           </Button>
-          {wallet.publicKey?.equals(exhibition.exhibitor) && (
+          {wallet?.publicKey.equals(exhibition.exhibitor) && (
             <Button isFullWidth colorScheme="red" mt="2" onClick={handleWithdraw}>
               Withdraw
             </Button>

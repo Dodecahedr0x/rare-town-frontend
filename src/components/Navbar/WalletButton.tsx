@@ -1,43 +1,28 @@
 import { Button, Tag, TagLabel } from "@chakra-ui/react";
-import { useDisclosure } from "@chakra-ui/hooks";
-import { useWallet } from "@solana/wallet-adapter-react";
-import WalletModal from "../../components/WalletModal";
-import { useEffect } from "react";
 import { shortAddress } from "utils";
 
 import useCollection from "../../hooks/useCollection";
+import { useConnectedWallet } from "@saberhq/use-solana";
+import { useWalletKit } from "@gokiprotocol/walletkit";
 
 const WalletButton: React.FC = () => {
-  const { isOpen, onClose, onOpen } = useDisclosure();
-  const { connected, publicKey, disconnect } = useWallet();
+  const { connect } = useWalletKit();
+  const wallet = useConnectedWallet();
   const { userAccount } = useCollection();
 
-  useEffect(() => {
-    if (connected) {
-      onClose();
-    }
-  }, [connected, onClose]);
-
-  return (
+  return wallet ? (
     <>
-      <WalletModal isOpen={isOpen} onClose={onClose} />
-      {connected ? (
-        <>
-          {userAccount && (
-            <Tag size="lg" variant="subtle" colorScheme="cyan">
-              <TagLabel>
-                {userAccount.amount.toNumber() / 10 ** 9} $TOWN
-              </TagLabel>
-            </Tag>
-          )}
-          <Button onClick={disconnect}>
-            {shortAddress(publicKey?.toString())}
-          </Button>
-        </>
-      ) : (
-        <Button onClick={onOpen}>Connect</Button>
+      {userAccount && (
+        <Tag size="lg" variant="subtle" colorScheme="cyan">
+          <TagLabel>{userAccount.amount.toNumber() / 10 ** 9} $TOWN</TagLabel>
+        </Tag>
       )}
+      <Button onClick={wallet.disconnect}>
+        {shortAddress(wallet.publicKey.toString())}
+      </Button>
     </>
+  ) : (
+    <Button onClick={connect}>Connect</Button>
   );
 };
 

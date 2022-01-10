@@ -13,10 +13,9 @@ import {
   Text,
   Wrap,
 } from "@chakra-ui/react";
-import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { Exhibition, ExhibitionItem } from "contexts/SteadRent";
 import { PublicKey } from "@solana/web3.js";
-import { findDataByOwner, shortAddress } from "utils";
+import { shortAddress } from "utils";
 import { MetadataData } from "@metaplex/js/lib/programs/metadata";
 import axios from "axios";
 import { MdStreetview } from "react-icons/md";
@@ -29,6 +28,8 @@ import DepositTokenCard from "./DepositTokenCard";
 import StatsCard from "components/StatsCard";
 import ExhibitedTokenCard from "./ExhibitedTokenCard";
 import { CollectionMint } from "contexts/Collection";
+import { Metadata } from "@metaplex-foundation/mpl-token-metadata";
+import { useConnectedWallet, useSolana } from "@saberhq/use-solana";
 
 interface ExhibitionModalProps {
   exhibition: Exhibition;
@@ -49,8 +50,8 @@ const ExhibitionModal: React.FC<ExhibitionModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  const { connection } = useConnection();
-  const wallet = useWallet();
+  const { provider } = useSolana();
+  const wallet = useConnectedWallet();
   const { fetchExhibitionItem } = useSteadRent();
 
   const [exhibitedTokens, setExhibitedTokens] = useState<
@@ -59,11 +60,14 @@ const ExhibitionModal: React.FC<ExhibitionModalProps> = ({
   const [ownedTokens, setOwnedTokens] = useState<AugmentedExhibitionItem[]>([]);
 
   const checkOwnedPieces = useCallback(async () => {
-    if (!(wallet.publicKey && exhibition.exhibitor.equals(wallet.publicKey)))
+    if (!(wallet && exhibition.exhibitor.equals(wallet.publicKey)))
       return;
 
     try {
-      const owned = await findDataByOwner(connection, wallet.publicKey);
+      const owned = await Metadata.findDataByOwner(
+        provider.connection,
+        wallet.publicKey
+      );
       setOwnedTokens(
         await Promise.all(
           owned.map(async (metadata) => {
@@ -75,19 +79,23 @@ const ExhibitionModal: React.FC<ExhibitionModalProps> = ({
     } catch (err) {
       console.log("Failed fetching owned tokens", err);
     }
-  }, [connection, exhibition, wallet, setOwnedTokens]);
+  }, [provider, exhibition, wallet, setOwnedTokens]);
 
   useEffect(() => {
     checkOwnedPieces();
   }, [checkOwnedPieces]);
 
   const checkExhibitedPieces = useCallback(async () => {
+    if (!wallet || !provider) return;
     const [escrow] = await PublicKey.findProgramAddress(
       [Buffer.from("escrow"), exhibition.property.toBuffer()],
       constants.steadRent
     );
 
-    const owned = await findDataByOwner(connection, escrow);
+    const owned = await Metadata.findDataByOwner(
+      provider.connection,
+      escrow
+    );
     setExhibitedTokens(
       await Promise.all(
         owned
@@ -112,7 +120,7 @@ const ExhibitionModal: React.FC<ExhibitionModalProps> = ({
           })
       )
     );
-  }, [connection, exhibition, property, fetchExhibitionItem]);
+  }, [provider, exhibition, property, wallet, fetchExhibitionItem]);
 
   useEffect(() => {
     checkExhibitedPieces();
@@ -175,7 +183,7 @@ const ExhibitionModal: React.FC<ExhibitionModalProps> = ({
               </Heading>
             )}
           </Box>
-          {wallet.publicKey?.equals(exhibition.exhibitor) && (
+          {wallet?.publicKey.equals(exhibition.exhibitor) && (
             <>
               <Divider my="5" />
               <Box my="2" align="center">

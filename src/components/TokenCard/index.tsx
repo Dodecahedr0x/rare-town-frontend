@@ -15,18 +15,18 @@ import {
 import useCollection from "hooks/useCollection";
 import useSteadRent from "hooks/useSteadRent";
 import { CollectionMint } from "contexts/Collection";
-import { useWallet } from "@solana/wallet-adapter-react";
 import * as anchor from "@project-serum/anchor";
 import { COLLECTION_CLAIM_DELAY } from "../../constants";
 import ExhibitionModal from "components/ExhibitionModal";
 import { ExhibitionStatus } from "contexts/SteadRent";
+import { useConnectedWallet } from "@saberhq/use-solana";
 
 interface TokenCardProps {
   token: CollectionMint;
 }
 
 const TokenCard: React.FC<TokenCardProps> = ({ token }) => {
-  const wallet = useWallet();
+  const wallet = useConnectedWallet();
   const {
     userAccount,
     claimToken,
@@ -125,7 +125,7 @@ const TokenCard: React.FC<TokenCardProps> = ({ token }) => {
             />
           </>
         )}
-        {wallet.connected && (
+        {wallet && (
           <>
             {userAccount ? (
               <>
