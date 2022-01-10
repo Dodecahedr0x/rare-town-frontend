@@ -23,19 +23,19 @@ const NAV_ITEMS: Array<NavItem> = [
       {
         label: "RareTown Programs On GitHub",
         subLabel: "Solana program repo",
-        href: "https://github.com/Dodecahedr0x/rare-town-programs",
+        href: "https://github.com/rare-town/rare-town-programs",
         newTab: true,
       },
       {
         label: "Stead renting Programs On GitHub",
         subLabel: "Solana program repo",
-        href: "https://github.com/Dodecahedr0x/stead-rent",
+        href: "https://github.com/rare-town/stead-rent-programs",
         newTab: true,
       },
       {
         label: "RareTown Front-End On GitHub",
         subLabel: "Front-end repo",
-        href: "https://github.com/Dodecahedr0x/rare-town-frontend",
+        href: "https://github.com/rare-town/rare-town-frontend",
         newTab: true,
       },
       {
